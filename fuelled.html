@@ -1,0 +1,1792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fuelled/</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@700;800&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #faf8f4;
+    --cream-mid: #f0ede8;
+    --cream-dark: #e8e4dc;
+    --ink: #111111;
+    --ink-mid: #444444;
+    --ink-light: #888888;
+    --ink-faint: #cccccc;
+    --green: #1a4a2e;
+    --green-mid: #2d6e47;
+    --green-light: #e8f2ec;
+    --white: #ffffff;
+    --border: rgba(17,17,17,0.12);
+    --border-strong: rgba(17,17,17,0.22);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; } to { opacity: 1; }
+  }
+  .fade-up { animation: fadeUp 0.45s ease both; }
+  .fade-in { animation: fadeIn 0.3s ease both; }
+  .d1 { animation-delay: 0.05s; }
+  .d2 { animation-delay: 0.12s; }
+  .d3 { animation-delay: 0.19s; }
+  .d4 { animation-delay: 0.26s; }
+  .d5 { animation-delay: 0.33s; }
+  .d6 { animation-delay: 0.40s; }
+
+  /* ── SCREENS ── */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2rem; height: 56px;
+    background: var(--cream); border-bottom: 0.5px solid var(--border);
+  }
+  .nav-logo { font-family: 'Epilogue', sans-serif; font-size: 18px; font-weight: 800; color: var(--ink); letter-spacing: -0.5px; }
+  .nav-slash { color: var(--green); }
+  .nav-links { display: flex; align-items: center; gap: 1.5rem; }
+  .nav-link { font-size: 13px; font-weight: 500; color: var(--ink-mid); cursor: pointer; letter-spacing: 0.3px; transition: color 0.15s; text-decoration: none; }
+  .nav-link:hover { color: var(--green); }
+  .nav-link.active { color: var(--green); }
+  .nav-btn { padding: 7px 16px; background: var(--green); color: var(--cream); border: none; border-radius: 3px; font-family: 'Barlow', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; cursor: pointer; transition: background 0.15s; }
+  .nav-btn:hover { background: var(--green-mid); }
+  .nav-user { font-size: 12px; color: var(--ink-light); font-weight: 500; }
+
+  /* ── LOGIN SCREEN ── */
+  #screen-login {
+    flex-direction: column; align-items: center; justify-content: center;
+    padding: 2rem;
+  }
+  .login-card {
+    width: 100%; max-width: 380px;
+  }
+  .login-logo { font-family: 'Epilogue', sans-serif; font-size: 36px; font-weight: 800; color: var(--ink); letter-spacing: -1.5px; margin-bottom: 2px; }
+  .login-logo span { color: var(--green); }
+  .login-tag { font-size: 10px; font-weight: 600; letter-spacing: 2.5px; text-transform: uppercase; color: var(--ink-light); margin-bottom: 36px; }
+  .login-divider-line { display: flex; align-items: center; gap: 10px; margin: 16px 0; }
+  .login-divider-line::before, .login-divider-line::after { content: ''; flex: 1; height: 0.5px; background: var(--border-strong); }
+  .login-divider-line span { font-size: 10px; color: var(--ink-faint); font-weight: 500; letter-spacing: 1px; }
+  .login-footer { text-align: center; margin-top: 20px; font-size: 12px; color: var(--ink-light); }
+  .login-footer a { color: var(--green); font-weight: 600; cursor: pointer; text-decoration: none; }
+  .login-skip { display: block; text-align: center; margin-top: 28px; font-size: 11px; color: var(--ink-faint); cursor: pointer; letter-spacing: 0.5px; text-decoration: underline; text-underline-offset: 3px; }
+
+  /* ── FORM ELEMENTS ── */
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--ink-light); margin-bottom: 5px; }
+  .field input, .field select {
+    width: 100%; padding: 10px 12px;
+    background: var(--white); border: 0.5px solid var(--border-strong);
+    border-radius: 3px; font-family: 'Barlow', sans-serif; font-size: 14px;
+    color: var(--ink); transition: border-color 0.15s; -webkit-appearance: none;
+  }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--green); }
+  .field input::placeholder { color: var(--ink-faint); }
+
+  .btn-primary {
+    width: 100%; padding: 12px; background: var(--green); color: var(--cream);
+    border: none; border-radius: 3px; font-family: 'Epilogue', sans-serif;
+    font-size: 13px; font-weight: 700; letter-spacing: 0.5px; cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-primary:hover { background: var(--green-mid); }
+
+  .btn-outline {
+    width: 100%; padding: 10px 12px; background: transparent;
+    border: 0.5px solid var(--border-strong); border-radius: 3px;
+    font-family: 'Barlow', sans-serif; font-size: 13px; font-weight: 500;
+    color: var(--ink-mid); cursor: pointer; transition: all 0.15s; text-align: center;
+  }
+  .btn-outline:hover { border-color: var(--green); color: var(--green); }
+
+  .btn-ghost {
+    background: none; border: none; font-family: 'Barlow', sans-serif;
+    font-size: 12px; color: var(--ink-light); cursor: pointer; padding: 0;
+    text-decoration: underline; text-underline-offset: 3px;
+  }
+  .btn-ghost:hover { color: var(--green); }
+
+  /* ── ONBOARDING ── */
+  #screen-onboarding {
+    flex-direction: column; align-items: center; justify-content: flex-start;
+    padding: 5rem 1.5rem 3rem;
+  }
+  .onboarding-inner { width: 100%; max-width: 480px; }
+  .step-bar { display: flex; gap: 5px; margin-bottom: 2.5rem; }
+  .step-pip { height: 2px; flex: 1; border-radius: 99px; background: var(--cream-dark); transition: background 0.3s; }
+  .step-pip.done { background: var(--green); }
+  .step-pip.active { background: var(--green); opacity: 0.5; }
+  .step-eyebrow { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--green); margin-bottom: 6px; }
+  .step-title { font-family: 'Epilogue', sans-serif; font-size: 26px; font-weight: 800; color: var(--ink); letter-spacing: -0.5px; margin-bottom: 6px; line-height: 1.15; }
+  .step-sub { font-size: 13px; color: var(--ink-light); line-height: 1.6; margin-bottom: 28px; }
+  .step-panel { display: none; }
+  .step-panel.active { display: block; }
+
+  .toggle-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .toggle-btn {
+    padding: 8px 18px; border-radius: 2px;
+    border: 0.5px solid var(--border-strong);
+    background: transparent; cursor: pointer; font-size: 13px; font-weight: 500;
+    color: var(--ink-mid); font-family: 'Barlow', sans-serif; transition: all 0.15s;
+  }
+  .toggle-btn:hover { border-color: var(--green); color: var(--green); }
+  .toggle-btn.on { background: var(--green); color: var(--cream); border-color: var(--green); }
+
+  .activity-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .activity-card {
+    padding: 12px 14px; border-radius: 3px; border: 0.5px solid var(--border-strong);
+    cursor: pointer; transition: all 0.15s;
+  }
+  .activity-card:hover { border-color: var(--green); }
+  .activity-card.on { border-color: var(--green); background: var(--green-light); }
+  .activity-card .a-name { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+  .activity-card.on .a-name { color: var(--green); }
+  .activity-card .a-desc { font-size: 11px; color: var(--ink-light); line-height: 1.4; }
+  .activity-wide { grid-column: span 2; }
+
+  .goal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .goal-card {
+    padding: 14px; border-radius: 3px; border: 0.5px solid var(--border-strong);
+    cursor: pointer; transition: all 0.15s; display: flex; align-items: flex-start; gap: 10px;
+  }
+  .goal-card:hover { border-color: var(--green); }
+  .goal-card.on { border-color: var(--green); background: var(--green-light); }
+  .goal-icon { width: 28px; height: 28px; border-radius: 2px; background: var(--cream-dark); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .goal-card.on .goal-icon { background: var(--green); }
+  .goal-name { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+  .goal-card.on .goal-name { color: var(--green); }
+  .goal-desc { font-size: 11px; color: var(--ink-light); line-height: 1.4; }
+
+  .btn-row { display: flex; gap: 10px; margin-top: 28px; align-items: center; }
+  .btn-back { padding: 11px 20px; background: transparent; border: 0.5px solid var(--border-strong); border-radius: 3px; font-family: 'Barlow', sans-serif; font-size: 13px; font-weight: 500; color: var(--ink-mid); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .btn-back:hover { border-color: var(--green); color: var(--green); }
+  .btn-next { flex: 1; padding: 12px; background: var(--green); color: var(--cream); border: none; border-radius: 3px; font-family: 'Epilogue', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.3px; cursor: pointer; transition: background 0.15s; }
+  .btn-next:hover { background: var(--green-mid); }
+
+  /* ── RESULTS ── */
+  #screen-results {
+    flex-direction: column; padding: 5rem 1.5rem 3rem;
+    align-items: center;
+  }
+  .results-inner { width: 100%; max-width: 560px; }
+  .results-eyebrow { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--green); margin-bottom: 6px; }
+  .results-title { font-family: 'Epilogue', sans-serif; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 24px; }
+
+  .calorie-block {
+    background: var(--green); border-radius: 4px; padding: 28px; margin-bottom: 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .calorie-num { font-family: 'Epilogue', sans-serif; font-size: 56px; font-weight: 800; color: var(--cream); line-height: 1; letter-spacing: -2px; }
+  .calorie-meta { text-align: right; }
+  .calorie-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(250,248,244,0.6); margin-bottom: 4px; }
+  .calorie-sub { font-size: 12px; color: rgba(250,248,244,0.75); line-height: 1.5; }
+
+  .macro-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+  .macro-tile { background: var(--white); border: 0.5px solid var(--border); border-radius: 4px; padding: 16px 14px; }
+  .macro-pct { font-family: 'Epilogue', sans-serif; font-size: 24px; font-weight: 800; margin-bottom: 2px; }
+  .macro-name { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--ink-light); margin-bottom: 6px; }
+  .macro-g { font-size: 20px; font-weight: 700; font-family: 'Barlow Condensed', sans-serif; }
+  .macro-kcal { font-size: 11px; color: var(--ink-light); margin-top: 2px; }
+  .p-color { color: var(--green); }
+  .c-color { color: #2563a8; }
+  .f-color { color: #a85c25; }
+
+  .info-card { background: var(--white); border: 0.5px solid var(--border); border-radius: 4px; padding: 20px; margin-bottom: 16px; }
+  .info-card h3 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--ink-light); margin-bottom: 14px; }
+  .mfp-step { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 10px; font-size: 13px; color: var(--ink-mid); line-height: 1.5; }
+  .mfp-num { min-width: 22px; height: 22px; border-radius: 2px; background: var(--green); color: var(--cream); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  .formula-note { font-size: 11px; color: var(--ink-faint); margin-top: 12px; padding-top: 12px; border-top: 0.5px solid var(--border); }
+
+  .results-actions { display: flex; gap: 10px; margin-top: 8px; }
+  .btn-recipes { flex: 1; padding: 14px; background: var(--green); color: var(--cream); border: none; border-radius: 3px; font-family: 'Epilogue', sans-serif; font-size: 14px; font-weight: 800; letter-spacing: 0.3px; cursor: pointer; transition: background 0.15s; }
+  .btn-recipes:hover { background: var(--green-mid); }
+  .btn-recalc { padding: 14px 20px; background: transparent; border: 0.5px solid var(--border-strong); border-radius: 3px; font-family: 'Barlow', sans-serif; font-size: 13px; font-weight: 500; color: var(--ink-mid); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .btn-recalc:hover { border-color: var(--green); color: var(--green); }
+
+  /* ── RECIPES ── */
+  #screen-recipes {
+    flex-direction: column; padding: 5rem 1.5rem 3rem; min-height: 100vh;
+  }
+  .recipes-inner { width: 100%; max-width: 900px; margin: 0 auto; }
+  .recipes-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 8px; flex-wrap: wrap; gap: 12px; }
+  .recipes-title { font-family: 'Epilogue', sans-serif; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
+  .recipes-sub { font-size: 13px; color: var(--ink-light); margin-bottom: 24px; }
+
+  .filter-row { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+  .filter-btn { padding: 7px 14px; border-radius: 2px; border: 0.5px solid var(--border-strong); background: transparent; font-family: 'Barlow', sans-serif; font-size: 12px; font-weight: 600; color: var(--ink-mid); cursor: pointer; transition: all 0.15s; letter-spacing: 0.3px; }
+  .filter-btn:hover { border-color: var(--green); color: var(--green); }
+  .filter-btn.on { background: var(--green); color: var(--cream); border-color: var(--green); }
+
+  .recipe-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .recipe-card {
+    background: var(--white); border: 0.5px solid var(--border); border-radius: 4px;
+    overflow: hidden; cursor: pointer; transition: border-color 0.15s;
+  }
+  .recipe-card:hover { border-color: var(--green); }
+  .recipe-img {
+    height: 160px; position: relative; overflow: hidden;
+    background: var(--cream-mid); border-bottom: 0.5px solid var(--border);
+  }
+  .recipe-img img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transition: transform 0.3s ease;
+  }
+  .recipe-card:hover .recipe-img img { transform: scale(1.04); }
+  .recipe-img .emoji-fallback {
+    position: absolute; inset: 0; display: flex; align-items: center;
+    justify-content: center; font-size: 40px; background: var(--cream-mid);
+  }
+  .recipe-body { padding: 14px; }
+  .recipe-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+  .recipe-tag { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 3px 7px; border-radius: 2px; }
+  .tag-goal { background: var(--green-light); color: var(--green); }
+  .tag-type { background: var(--cream-dark); color: var(--ink-mid); }
+  .recipe-name { font-family: 'Epilogue', sans-serif; font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 4px; letter-spacing: -0.2px; }
+  .recipe-desc { font-size: 12px; color: var(--ink-light); line-height: 1.5; margin-bottom: 12px; }
+  .recipe-macros { display: flex; gap: 12px; padding-top: 10px; border-top: 0.5px solid var(--border); }
+  .recipe-macro { font-size: 11px; color: var(--ink-light); }
+  .recipe-macro strong { font-weight: 700; color: var(--ink); }
+
+  /* modal */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(17,17,17,0.5); z-index: 200; align-items: center; justify-content: center; padding: 1rem; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--cream); border-radius: 4px; width: 100%; max-width: 520px; max-height: 85vh; overflow-y: auto; }
+  .modal-header { padding: 20px 20px 0; display: flex; justify-content: space-between; align-items: flex-start; }
+  .modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--ink-light); line-height: 1; padding: 0; }
+  .modal-body { padding: 16px 20px 24px; }
+  .modal-img {
+    height: 200px; border-radius: 3px; overflow: hidden;
+    background: var(--cream-mid); margin-bottom: 16px; position: relative;
+  }
+  .modal-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .modal-img .emoji-fallback {
+    position: absolute; inset: 0; display: flex; align-items: center;
+    justify-content: center; font-size: 56px; background: var(--cream-mid);
+  }
+  .modal-title { font-family: 'Epilogue', sans-serif; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .modal-sub { font-size: 13px; color: var(--ink-light); margin-bottom: 16px; }
+  .modal-macro-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 20px; }
+  .modal-macro { background: var(--white); border: 0.5px solid var(--border); border-radius: 3px; padding: 10px 8px; text-align: center; }
+  .modal-macro .val { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; }
+  .modal-macro .lbl { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-light); font-weight: 700; margin-top: 1px; }
+  .modal-section { margin-bottom: 16px; }
+  .modal-section h4 { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--ink-light); margin-bottom: 10px; }
+  .ingredient-list { list-style: none; }
+  .ingredient-list li { font-size: 13px; color: var(--ink-mid); padding: 5px 0; border-bottom: 0.5px solid var(--border); display: flex; justify-content: space-between; }
+  .step-list { list-style: none; counter-reset: steps; }
+  .step-list li { counter-increment: steps; font-size: 13px; color: var(--ink-mid); line-height: 1.6; padding: 8px 0 8px 32px; border-bottom: 0.5px solid var(--border); position: relative; }
+  .step-list li::before { content: counter(steps); position: absolute; left: 0; top: 8px; width: 20px; height: 20px; background: var(--green); color: var(--cream); border-radius: 2px; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+
+  /* AI generate */
+  .ai-section { background: var(--white); border: 0.5px solid var(--border); border-radius: 4px; padding: 20px; margin-top: 24px; }
+  .ai-section-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; gap: 12px; }
+  .ai-section h3 { font-family: 'Epilogue', sans-serif; font-size: 15px; font-weight: 800; margin-bottom: 3px; }
+  .ai-section p { font-size: 13px; color: var(--ink-light); line-height: 1.5; margin: 0; }
+  .ai-badge { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--green); border: 0.5px solid var(--green); border-radius: 2px; padding: 3px 7px; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+  .ai-input-row { display: flex; gap: 8px; }
+  .ai-input { flex: 1; padding: 10px 12px; background: var(--cream); border: 0.5px solid var(--border-strong); border-radius: 3px; font-family: 'Barlow', sans-serif; font-size: 13px; color: var(--ink); }
+  .ai-input:focus { outline: none; border-color: var(--green); }
+  .ai-input:disabled { opacity: 0.5; cursor: not-allowed; }
+  .ai-btn { padding: 10px 18px; background: var(--green); color: var(--cream); border: none; border-radius: 3px; font-family: 'Epilogue', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: background 0.15s; }
+  .ai-btn:hover:not(:disabled) { background: var(--green-mid); }
+  .ai-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .ai-loading { display: none; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-light); margin-top: 12px; }
+  .ai-loading-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 1s ease-in-out infinite; flex-shrink: 0; }
+  @keyframes pulse { 0%,100%{opacity:0.3;transform:scale(0.8)} 50%{opacity:1;transform:scale(1)} }
+  .ai-error { display: none; margin-top: 12px; padding: 10px 12px; background: #fdf2f2; border: 0.5px solid rgba(180,40,40,0.2); border-radius: 3px; font-size: 12px; color: #a03030; }
+  /* AI generated card */
+  #ai-card-container { margin-top: 14px; }
+  .ai-generated-card { background: var(--white); border: 0.5px solid var(--green); border-radius: 4px; overflow: hidden; animation: fadeUp 0.4s ease both; }
+  .ai-generated-header { background: var(--green-light); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 0.5px solid rgba(26,74,46,0.15); }
+  .ai-generated-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--green); }
+  .ai-add-btn { padding: 6px 14px; background: var(--green); color: var(--cream); border: none; border-radius: 2px; font-family: 'Epilogue', sans-serif; font-size: 11px; font-weight: 700; cursor: pointer; transition: background 0.15s; letter-spacing: 0.3px; }
+  .ai-add-btn:hover { background: var(--green-mid); }
+  .ai-add-btn.added { background: var(--cream-dark); color: var(--ink-light); cursor: default; }
+  .ai-card-body { padding: 16px; }
+  .ai-card-img { height: 160px; position: relative; overflow: hidden; background: var(--cream-mid); margin: -16px -16px 16px; }
+  .ai-card-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .ai-card-img .emoji-fallback { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 40px; background: var(--cream-mid); }
+  .ai-card-name { font-family: 'Epilogue', sans-serif; font-size: 17px; font-weight: 800; letter-spacing: -0.3px; margin-bottom: 4px; }
+  .ai-card-desc { font-size: 12px; color: var(--ink-light); line-height: 1.5; margin-bottom: 14px; }
+  .ai-card-macros { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 16px; }
+  .ai-card-macro { background: var(--cream); border: 0.5px solid var(--border); border-radius: 3px; padding: 8px; text-align: center; }
+  .ai-card-macro .val { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; }
+  .ai-card-macro .lbl { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-light); font-weight: 700; }
+  .ai-card-section h4 { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--ink-light); margin-bottom: 8px; }
+  .ai-card-section { margin-bottom: 14px; }
+
+  /* profile badge */
+  .profile-banner { background: var(--green-light); border: 0.5px solid rgba(26,74,46,0.2); border-radius: 4px; padding: 14px 18px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  .profile-banner .pb-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--green); margin-bottom: 3px; }
+  .profile-banner .pb-nums { font-size: 13px; color: var(--ink-mid); }
+  .profile-banner .pb-nums strong { color: var(--ink); font-weight: 700; }
+
+  /* empty state */
+  .empty { text-align: center; padding: 3rem 1rem; color: var(--ink-light); }
+  .empty h3 { font-family: 'Epilogue', sans-serif; font-size: 18px; font-weight: 800; color: var(--ink); margin-bottom: 6px; }
+  .empty p { font-size: 13px; line-height: 1.6; }
+
+  /* ── TRAINING TYPE CARDS ── */
+  .train-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .train-card {
+    padding: 14px; border-radius: 3px; border: 0.5px solid var(--border-strong);
+    cursor: pointer; transition: all 0.15s;
+  }
+  .train-card:hover { border-color: var(--green); }
+  .train-card.on { border-color: var(--green); background: var(--green-light); }
+  .train-card .t-name { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+  .train-card.on .t-name { color: var(--green); }
+  .train-card .t-desc { font-size: 11px; color: var(--ink-light); line-height: 1.4; }
+  .train-wide { grid-column: span 2; }
+
+  /* ── NEAT CARDS ── */
+  .neat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .neat-card {
+    padding: 14px 10px; border-radius: 3px; border: 0.5px solid var(--border-strong);
+    cursor: pointer; transition: all 0.15s; text-align: center;
+  }
+  .neat-card:hover { border-color: var(--green); }
+  .neat-card.on { border-color: var(--green); background: var(--green-light); }
+  .neat-card .n-name { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+  .neat-card.on .n-name { color: var(--green); }
+  .neat-card .n-desc { font-size: 11px; color: var(--ink-light); line-height: 1.4; }
+
+  /* ── VOLUME INPUT ── */
+  .volume-row { display: flex; gap: 10px; align-items: flex-end; margin-top: 16px; }
+  .volume-row .field { flex: 1; margin-bottom: 0; }
+  .volume-unit { font-size: 12px; color: var(--ink-light); font-weight: 500; padding-bottom: 12px; white-space: nowrap; }
+
+  /* ── OPTIONAL FIELD ── */
+  .field-optional { position: relative; }
+  .optional-badge { font-size: 9px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: var(--ink-faint); margin-left: 6px; }
+  .field-hint { font-size: 11px; color: var(--ink-faint); margin-top: 4px; line-height: 1.4; }
+
+  /* ── FORMULA NOTE ON RESULTS ── */
+  .formula-note { font-size: 11px; color: var(--ink-faint); margin-top: 12px; padding-top: 12px; border-top: 0.5px solid var(--border); }
+
+  /* responsive */
+  @media (max-width: 600px) {
+    .calorie-block { flex-direction: column; gap: 12px; text-align: center; }
+    .calorie-meta { text-align: center; }
+    .macro-row { grid-template-columns: 1fr 1fr 1fr; }
+    .results-actions { flex-direction: column; }
+    nav { padding: 0 1rem; }
+    .nav-links { gap: 1rem; }
+    .recipe-grid { grid-template-columns: 1fr; }
+    .activity-wide { grid-column: span 2; }
+  }
+
+  /* ── MEAL PLAN SCREEN ── */
+  #screen-mealplan {
+    flex-direction: column; padding: 5rem 1.5rem 3rem; min-height: 100vh;
+  }
+  .mealplan-inner { width: 100%; max-width: 680px; margin: 0 auto; }
+  .mealplan-header { margin-bottom: 24px; }
+  .mealplan-title { font-family: 'Epilogue', sans-serif; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .mealplan-sub { font-size: 13px; color: var(--ink-light); line-height: 1.5; }
+
+  /* no-profile nudge */
+  .mp-no-profile { background: var(--white); border: 0.5px solid var(--border); border-radius: 4px; padding: 32px 24px; text-align: center; }
+  .mp-no-profile h3 { font-family: 'Epilogue', sans-serif; font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+  .mp-no-profile p { font-size: 13px; color: var(--ink-light); line-height: 1.6; margin-bottom: 20px; }
+
+  /* target summary bar */
+  .mp-target-bar { background: var(--green); border-radius: 4px; padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  .mp-target-bar .tbl { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: rgba(250,248,244,0.65); margin-bottom: 2px; }
+  .mp-target-bar .tbv { font-family: 'Epilogue', sans-serif; font-size: 22px; font-weight: 800; color: var(--cream); letter-spacing: -0.5px; line-height: 1; }
+  .mp-target-macros { display: flex; gap: 16px; }
+  .mp-target-macro { text-align: right; }
+  .mp-target-macro .tbl { font-size: 9px; }
+  .mp-target-macro .tbv { font-size: 14px; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; color: rgba(250,248,244,0.85); }
+
+  /* generate controls */
+  .mp-controls { display: flex; gap: 10px; margin-bottom: 24px; align-items: center; flex-wrap: wrap; }
+  .mp-pref-input { flex: 1; min-width: 200px; padding: 10px 12px; background: var(--white); border: 0.5px solid var(--border-strong); border-radius: 3px; font-family: 'Barlow', sans-serif; font-size: 13px; color: var(--ink); }
+  .mp-pref-input:focus { outline: none; border-color: var(--green); }
+  .mp-pref-input:disabled { opacity: 0.5; }
+  .mp-gen-btn { padding: 11px 22px; background: var(--green); color: var(--cream); border: none; border-radius: 3px; font-family: 'Epilogue', sans-serif; font-size: 13px; font-weight: 800; letter-spacing: 0.3px; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+  .mp-gen-btn:hover:not(:disabled) { background: var(--green-mid); }
+  .mp-gen-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* meal slots */
+  .mp-slots { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+
+  .mp-slot { background: var(--white); border: 0.5px solid var(--border); border-radius: 4px; overflow: hidden; }
+  .mp-slot-header { padding: 10px 14px; background: var(--cream-mid); border-bottom: 0.5px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .mp-slot-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--ink-light); }
+  .mp-slot-cals { font-size: 11px; font-weight: 700; color: var(--green); font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.3px; }
+  .mp-slot-body { padding: 14px; display: flex; gap: 14px; align-items: flex-start; }
+  .mp-slot-img { width: 80px; height: 80px; border-radius: 3px; overflow: hidden; flex-shrink: 0; background: var(--cream-mid); position: relative; }
+  .mp-slot-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .mp-slot-img .emoji-fallback { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 28px; background: var(--cream-mid); }
+  .mp-slot-info { flex: 1; min-width: 0; }
+  .mp-slot-name { font-family: 'Epilogue', sans-serif; font-size: 15px; font-weight: 800; letter-spacing: -0.2px; margin-bottom: 3px; color: var(--ink); }
+  .mp-slot-desc { font-size: 12px; color: var(--ink-light); line-height: 1.5; margin-bottom: 10px; }
+  .mp-slot-macros { display: flex; gap: 10px; }
+  .mp-slot-macro { font-size: 11px; color: var(--ink-light); }
+  .mp-slot-macro strong { font-weight: 700; color: var(--ink); }
+  .mp-slot-actions { display: flex; gap: 6px; margin-top: 10px; }
+  .mp-slot-save { padding: 5px 12px; background: transparent; border: 0.5px solid var(--border-strong); border-radius: 2px; font-family: 'Barlow', sans-serif; font-size: 11px; font-weight: 600; color: var(--ink-mid); cursor: pointer; transition: all 0.15s; }
+  .mp-slot-save:hover { border-color: var(--green); color: var(--green); }
+  .mp-slot-save.saved { background: var(--cream-dark); color: var(--ink-faint); cursor: default; border-color: transparent; }
+  .mp-slot-view { padding: 5px 12px; background: transparent; border: 0.5px solid var(--border-strong); border-radius: 2px; font-family: 'Barlow', sans-serif; font-size: 11px; font-weight: 600; color: var(--ink-mid); cursor: pointer; transition: all 0.15s; }
+  .mp-slot-view:hover { border-color: var(--green); color: var(--green); }
+
+  /* skeleton loading */
+  .mp-skeleton { background: var(--white); border: 0.5px solid var(--border); border-radius: 4px; overflow: hidden; }
+  .mp-skeleton-header { height: 38px; background: var(--cream-mid); }
+  .mp-skeleton-body { padding: 14px; display: flex; gap: 14px; }
+  .mp-skeleton-img { width: 80px; height: 80px; border-radius: 3px; background: var(--cream-dark); flex-shrink: 0; animation: shimmer 1.4s ease-in-out infinite; }
+  .mp-skeleton-lines { flex: 1; display: flex; flex-direction: column; gap: 8px; padding-top: 4px; }
+  .mp-skeleton-line { height: 12px; border-radius: 2px; background: var(--cream-dark); animation: shimmer 1.4s ease-in-out infinite; }
+  .mp-skeleton-line.w80 { width: 80%; }
+  .mp-skeleton-line.w60 { width: 60%; }
+  .mp-skeleton-line.w40 { width: 40%; }
+  @keyframes shimmer { 0%,100%{opacity:0.5} 50%{opacity:1} }
+
+  /* day totals */
+  .mp-totals { background: var(--white); border: 0.5px solid var(--border); border-radius: 4px; padding: 16px; }
+  .mp-totals h4 { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--ink-light); margin-bottom: 14px; }
+  .mp-totals-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
+  .mp-total-tile { text-align: center; }
+  .mp-total-val { font-family: 'Epilogue', sans-serif; font-size: 22px; font-weight: 800; margin-bottom: 2px; }
+  .mp-total-target { font-size: 10px; color: var(--ink-faint); margin-bottom: 4px; }
+  .mp-total-lbl { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-light); }
+  .mp-total-bar { height: 3px; background: var(--cream-dark); border-radius: 99px; margin-top: 6px; overflow: hidden; }
+  .mp-total-bar-fill { height: 100%; border-radius: 99px; background: var(--green); transition: width 0.5s ease; }
+  .mp-total-bar-fill.over { background: #a85c25; }
+
+  @media (max-width: 600px) {
+    .mp-slot-body { flex-direction: column; }
+    .mp-slot-img { width: 100%; height: 140px; }
+    .mp-controls { flex-direction: column; }
+    .mp-pref-input { width: 100%; }
+    .mp-gen-btn { width: 100%; }
+  }
+
+
+  /* ── MANUAL ENTRY SHORTCUT ── */
+  .shortcut-link { display: block; text-align: center; margin-top: 20px; font-size: 11px; color: var(--ink-faint); cursor: pointer; letter-spacing: 0.3px; }
+  .shortcut-link:hover { color: var(--green); }
+  .shortcut-link span { text-decoration: underline; text-underline-offset: 3px; }
+
+  .manual-overlay { display: none; position: fixed; inset: 0; background: rgba(17,17,17,0.5); z-index: 200; align-items: center; justify-content: center; padding: 1rem; }
+  .manual-overlay.open { display: flex; }
+  .manual-card { background: var(--cream); border-radius: 4px; width: 100%; max-width: 380px; padding: 28px 24px; }
+  .manual-card-title { font-family: 'Epilogue', sans-serif; font-size: 20px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .manual-card-sub { font-size: 12px; color: var(--ink-light); margin-bottom: 22px; line-height: 1.5; }
+  .manual-card .field { margin-bottom: 12px; }
+  .manual-goal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .manual-goal-btn { padding: 8px 10px; border-radius: 2px; border: 0.5px solid var(--border-strong); background: transparent; cursor: pointer; font-size: 12px; font-weight: 500; color: var(--ink-mid); font-family: 'Barlow', sans-serif; transition: all 0.15s; text-align: center; }
+  .manual-goal-btn:hover { border-color: var(--green); color: var(--green); }
+  .manual-goal-btn.on { background: var(--green); color: var(--cream); border-color: var(--green); }
+  .manual-btn-row { display: flex; gap: 8px; margin-top: 20px; }
+  .manual-cancel { padding: 11px 16px; background: transparent; border: 0.5px solid var(--border-strong); border-radius: 3px; font-family: 'Barlow', sans-serif; font-size: 13px; font-weight: 500; color: var(--ink-mid); cursor: pointer; }
+  .manual-cancel:hover { border-color: var(--green); color: var(--green); }
+  .manual-submit { flex: 1; padding: 12px; background: var(--green); color: var(--cream); border: none; border-radius: 3px; font-family: 'Epilogue', sans-serif; font-size: 13px; font-weight: 800; letter-spacing: 0.3px; cursor: pointer; }
+  .manual-submit:hover { background: var(--green-mid); }
+  .manual-error { font-size: 11px; color: #a03030; margin-top: 8px; display: none; }
+
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="main-nav" style="display:none;">
+  <div class="nav-logo">Fuelled<span class="nav-slash">/</span></div>
+  <div class="nav-links">
+    <a class="nav-link" onclick="showScreen('recipes')" id="nl-recipes">Recipes</a>
+    <a class="nav-link" onclick="showScreen('mealplan')" id="nl-mealplan">Meal plan</a>
+    <a class="nav-link" onclick="showScreen('results')" id="nl-results">My targets</a>
+    <span class="nav-user" id="nav-username"></span>
+    <button class="nav-btn" onclick="logout()">Sign out</button>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════
+     SCREEN: LOGIN
+══════════════════════════════════ -->
+<div class="screen active" id="screen-login">
+  <div class="login-card fade-up">
+    <div class="login-logo">Fuelled<span>/</span></div>
+    <div class="login-tag">nutrition. no noise.</div>
+
+    <div class="field fade-up d1">
+      <label>Email</label>
+      <input type="email" id="login-email" placeholder="you@example.com" />
+    </div>
+    <div class="field fade-up d2">
+      <label>Password</label>
+      <input type="password" id="login-pass" placeholder="••••••••" />
+    </div>
+    <div class="fade-up d3">
+      <button class="btn-primary" onclick="doLogin()">Sign in</button>
+    </div>
+    <div class="login-divider-line fade-up d4"><span>or</span></div>
+    <div class="fade-up d5">
+      <button class="btn-outline" onclick="doLogin()">Continue with Google</button>
+    </div>
+    <div class="login-footer fade-up d6">No account? <a onclick="doLogin()">Create one</a></div>
+    <span class="login-skip fade-up d6" onclick="skipLogin()">Skip — explore without an account</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     SCREEN: ONBOARDING
+══════════════════════════════════ -->
+<div class="screen" id="screen-onboarding">
+  <div class="onboarding-inner">
+    <div class="step-bar">
+      <div class="step-pip active" id="pip0"></div>
+      <div class="step-pip" id="pip1"></div>
+      <div class="step-pip" id="pip2"></div>
+      <div class="step-pip" id="pip3"></div>
+      <div class="step-pip" id="pip4"></div>
+    </div>
+
+    <!-- Step 0: Body -->
+    <div class="step-panel active" id="panel-0">
+      <div class="step-eyebrow fade-up">Step 1 of 5</div>
+      <div class="step-title fade-up d1">Your body.</div>
+      <div class="step-sub fade-up d2">The foundation of your calculation. Add body fat % if you know it — we'll use Katch-McArdle for a more accurate result.</div>
+      <div class="fade-up d2">
+        <div class="field">
+          <label>Biological sex</label>
+          <div class="toggle-group">
+            <button class="toggle-btn" onclick="pick('sex','male',this)">Male</button>
+            <button class="toggle-btn" onclick="pick('sex','female',this)">Female</button>
+          </div>
+        </div>
+        <div class="field"><label>Age</label><input type="number" id="f-age" placeholder="30" min="16" max="99" /></div>
+        <div class="field"><label>Height (cm)</label><input type="number" id="f-height" placeholder="175" min="100" max="250" /></div>
+        <div class="field"><label>Weight (kg)</label><input type="number" id="f-weight" placeholder="75" min="30" max="300" /></div>
+        <div class="field field-optional">
+          <label>Body fat % <span class="optional-badge">Optional</span></label>
+          <input type="number" id="f-bf" placeholder="e.g. 18" min="3" max="60" step="0.5" />
+          <div class="field-hint">Enables Katch-McArdle BMR — more accurate if you train regularly.</div>
+        </div>
+      </div>
+      <div class="btn-row fade-up d3">
+        <button class="btn-next" style="max-width:none;" onclick="nextStep(0)">Next →</button>
+      </div>
+      <div class="fade-up d3">
+        <span class="shortcut-link" onclick="openManualEntry()">Already know your numbers? <span>Enter them directly →</span></span>
+      </div>
+    </div>
+
+    <!-- Step 1: Training type + volume -->
+    <div class="step-panel" id="panel-1">
+      <div class="step-eyebrow fade-up">Step 2 of 5</div>
+      <div class="step-title fade-up d1">How you train.</div>
+      <div class="step-sub fade-up d2">Training type shapes your macro floors. Volume determines your exercise energy expenditure.</div>
+      <div class="fade-up d2">
+        <div class="field" style="margin-bottom:16px;">
+          <label>Training type</label>
+          <div class="train-grid" id="train-grid">
+            <div class="train-card" onclick="pickTrain('strength',this)">
+              <div class="t-name">Strength</div>
+              <div class="t-desc">Weights, powerlifting, CrossFit</div>
+            </div>
+            <div class="train-card" onclick="pickTrain('endurance',this)">
+              <div class="t-name">Endurance</div>
+              <div class="t-desc">Running, cycling, triathlon</div>
+            </div>
+            <div class="train-card" onclick="pickTrain('mixed',this)">
+              <div class="t-name">Mixed</div>
+              <div class="t-desc">Strength + cardio combined</div>
+            </div>
+            <div class="train-card" onclick="pickTrain('general',this)">
+              <div class="t-name">General fitness</div>
+              <div class="t-desc">Classes, recreational sport, gym</div>
+            </div>
+          </div>
+        </div>
+        <div id="volume-field" style="display:none;">
+          <div class="field">
+            <label id="volume-label">Training volume</label>
+            <div class="volume-row">
+              <div class="field"><input type="number" id="f-volume" placeholder="0" min="0" max="100" /></div>
+              <div class="volume-unit" id="volume-unit">hrs / week</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="btn-row fade-up d3">
+        <button class="btn-back" onclick="prevStep(1)">← Back</button>
+        <button class="btn-next" onclick="nextStep(1)">Next →</button>
+      </div>
+    </div>
+
+    <!-- Step 2: NEAT / daily activity -->
+    <div class="step-panel" id="panel-2">
+      <div class="step-eyebrow fade-up">Step 3 of 5</div>
+      <div class="step-title fade-up d1">Your day.</div>
+      <div class="step-sub fade-up d2">Non-exercise activity — how much you move outside of training — adds meaningfully to your total energy expenditure.</div>
+      <div class="neat-grid fade-up d2">
+        <div class="neat-card" onclick="pick('neat',0,this)">
+          <div class="n-name">Desk-based</div>
+          <div class="n-desc">Seated most of the day</div>
+        </div>
+        <div class="neat-card" onclick="pick('neat',100,this)">
+          <div class="n-name">On your feet</div>
+          <div class="n-desc">Teaching, retail, hospitality</div>
+        </div>
+        <div class="neat-card" onclick="pick('neat',200,this)">
+          <div class="n-name">Physical job</div>
+          <div class="n-desc">Construction, nursing, trades</div>
+        </div>
+      </div>
+      <div class="btn-row fade-up d3">
+        <button class="btn-back" onclick="prevStep(2)">← Back</button>
+        <button class="btn-next" onclick="nextStep(2)">Next →</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Goal -->
+    <div class="step-panel" id="panel-3">
+      <div class="step-eyebrow fade-up">Step 4 of 5</div>
+      <div class="step-title fade-up d1">Your goal.</div>
+      <div class="step-sub fade-up d2">Sets your calorie adjustment. Macro splits are calculated from your goal and training type combined.</div>
+      <div class="goal-grid fade-up d2">
+        <div class="goal-card" onclick="pick('goal','loss',this)">
+          <div class="goal-icon">🔥</div>
+          <div><div class="goal-name">Lose fat</div><div class="goal-desc">−300 cal deficit</div></div>
+        </div>
+        <div class="goal-card" onclick="pick('goal','muscle',this)">
+          <div class="goal-icon">💪</div>
+          <div><div class="goal-name">Build muscle</div><div class="goal-desc">+300 cal surplus</div></div>
+        </div>
+        <div class="goal-card" onclick="pick('goal','maintain',this)">
+          <div class="goal-icon">⚖️</div>
+          <div><div class="goal-name">Maintain</div><div class="goal-desc">TDEE calories</div></div>
+        </div>
+        <div class="goal-card" onclick="pick('goal','endurance',this)">
+          <div class="goal-icon">🏃</div>
+          <div><div class="goal-name">Endurance performance</div><div class="goal-desc">TDEE calories</div></div>
+        </div>
+      </div>
+      <div class="btn-row fade-up d3">
+        <button class="btn-back" onclick="prevStep(3)">← Back</button>
+        <button class="btn-next" onclick="calculate()">Calculate →</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     SCREEN: RESULTS
+══════════════════════════════════ -->
+<div class="screen" id="screen-results">
+  <div class="results-inner">
+    <div class="results-eyebrow fade-up">Your daily targets</div>
+    <div class="results-title fade-up d1" id="results-title">Here's what your body needs.</div>
+
+    <div class="calorie-block fade-up d2">
+      <div class="calorie-num" id="r-cals">—</div>
+      <div class="calorie-meta">
+        <div class="calorie-label">Calories / day</div>
+        <div class="calorie-sub" id="r-goal-label">—</div>
+      </div>
+    </div>
+
+    <div class="macro-row fade-up d3">
+      <div class="macro-tile">
+        <div class="macro-pct p-color" id="r-p-pct">—</div>
+        <div class="macro-name">Protein</div>
+        <div class="macro-g p-color" id="r-p-g">—</div>
+        <div class="macro-kcal" id="r-p-kcal">—</div>
+      </div>
+      <div class="macro-tile">
+        <div class="macro-pct c-color" id="r-c-pct">—</div>
+        <div class="macro-name">Carbs</div>
+        <div class="macro-g c-color" id="r-c-g">—</div>
+        <div class="macro-kcal" id="r-c-kcal">—</div>
+      </div>
+      <div class="macro-tile">
+        <div class="macro-pct f-color" id="r-f-pct">—</div>
+        <div class="macro-name">Fat</div>
+        <div class="macro-g f-color" id="r-f-g">—</div>
+        <div class="macro-kcal" id="r-f-kcal">—</div>
+      </div>
+    </div>
+
+    <div class="info-card fade-up d4">
+      <h3>Set this up in MyFitnessPal</h3>
+      <div class="mfp-step"><div class="mfp-num">1</div><div>Open MyFitnessPal → <strong>More</strong> → <strong>Goals</strong></div></div>
+      <div class="mfp-step"><div class="mfp-num">2</div><div>Tap <strong>Calorie & Macronutrient Goals</strong> — set daily calories to <strong id="mfp-cals">—</strong></div></div>
+      <div class="mfp-step"><div class="mfp-num">3</div><div>Set Protein to <strong id="mfp-p">—</strong>%, Carbs to <strong id="mfp-c">—</strong>%, Fat to <strong id="mfp-f">—</strong>%</div></div>
+      <div class="mfp-step"><div class="mfp-num">4</div><div>Disable <em>Guided setup</em> and enter percentages manually to match exactly</div></div>
+      <div class="mfp-step"><div class="mfp-num">5</div><div>Use the Diary daily — the macro bar will reflect your personal targets</div></div>
+      <div class="formula-note" id="formula-note">Calculated using Mifflin-St Jeor (BMR) × training-derived activity factor + NEAT adjustment. Macro floors based on ISSN guidelines.</div>
+    </div>
+
+    <div class="results-actions fade-up d5">
+      <button class="btn-recipes" onclick="showScreen('recipes')">Explore matched recipes →</button>
+      <button class="btn-recalc" onclick="showScreen('onboarding')">Recalculate</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     SCREEN: RECIPES
+══════════════════════════════════ -->
+<div class="screen" id="screen-recipes">
+  <div class="recipes-inner">
+    <div class="recipes-header">
+      <div>
+        <div class="recipes-title fade-up">Recipes.</div>
+        <div class="recipes-sub fade-up d1" id="recipes-sub">Matched to your nutrition targets.</div>
+      </div>
+    </div>
+
+    <div id="profile-banner" class="profile-banner fade-up d1" style="display:none;">
+      <div>
+        <div class="pb-label">Your daily target</div>
+        <div class="pb-nums" id="pb-nums">—</div>
+      </div>
+      <button class="btn-ghost" onclick="showScreen('results')">View full breakdown →</button>
+    </div>
+
+    <div class="filter-row fade-up d2" id="filter-row">
+      <button class="filter-btn on" onclick="filterRecipes('all',this)">All</button>
+      <button class="filter-btn" onclick="filterRecipes('breakfast',this)">Breakfast</button>
+      <button class="filter-btn" onclick="filterRecipes('lunch',this)">Lunch</button>
+      <button class="filter-btn" onclick="filterRecipes('dinner',this)">Dinner</button>
+      <button class="filter-btn" onclick="filterRecipes('snack',this)">Snacks</button>
+      <button class="filter-btn" onclick="filterRecipes('high-protein',this)">High protein</button>
+      <button class="filter-btn" onclick="filterRecipes('low-carb',this)">Low carb</button>
+      <button class="filter-btn" onclick="filterRecipes('meal-prep',this)">Meal prep</button>
+    </div>
+
+    <div class="recipe-grid fade-up d3" id="recipe-grid"></div>
+
+    <div class="ai-section fade-up d4">
+      <div class="ai-section-header">
+        <div>
+          <h3>Generate a recipe for your goals</h3>
+          <p>Describe what you want. It drops straight into your library.</p>
+        </div>
+        <span class="ai-badge">AI /</span>
+      </div>
+      <div class="ai-input-row">
+        <input class="ai-input" id="ai-prompt" placeholder="e.g. high protein pasta, quick post-workout snack, low carb dinner under 500 cal" />
+        <button class="ai-btn" id="ai-btn" onclick="generateRecipe()">Generate /</button>
+      </div>
+      <div class="ai-loading" id="ai-loading">Building your recipe...</div>
+      <div class="ai-error" id="ai-error"></div>
+    </div>
+    <div id="ai-card-container"></div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════
+     SCREEN: MEAL PLAN
+══════════════════════════════════ -->
+<div class="screen" id="screen-mealplan">
+  <div class="mealplan-inner">
+    <div class="mealplan-header fade-up">
+      <div class="mealplan-title">Meal plan.</div>
+      <div class="mealplan-sub">A full day of eating, built around your targets.</div>
+    </div>
+
+    <!-- No profile state -->
+    <div id="mp-no-profile" class="mp-no-profile fade-up d1" style="display:none;">
+      <h3>Set your targets first.</h3>
+      <p>Calculate your daily calories and macros, then come back here to build a matched meal plan.</p>
+      <button class="btn-primary" style="width:auto;padding:12px 28px;" onclick="showScreen('onboarding')">Calculate my targets →</button>
+    </div>
+
+    <!-- Has profile state -->
+    <div id="mp-has-profile" style="display:none;">
+      <div class="mp-target-bar fade-up d1">
+        <div>
+          <div class="tbl">Daily target</div>
+          <div class="tbv" id="mp-target-cals">—</div>
+        </div>
+        <div class="mp-target-macros">
+          <div class="mp-target-macro">
+            <div class="tbl">Protein</div>
+            <div class="tbv" id="mp-target-p">—</div>
+          </div>
+          <div class="mp-target-macro">
+            <div class="tbl">Carbs</div>
+            <div class="tbv" id="mp-target-c">—</div>
+          </div>
+          <div class="mp-target-macro">
+            <div class="tbl">Fat</div>
+            <div class="tbv" id="mp-target-f">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mp-controls fade-up d2">
+        <input class="mp-pref-input" id="mp-pref" placeholder="Any preferences? e.g. no fish, high carb, quick to make, meal prep friendly" />
+        <button class="mp-gen-btn" id="mp-gen-btn" onclick="generateMealPlan()">Build my day /</button>
+      </div>
+
+      <div class="mp-slots fade-up d3" id="mp-slots">
+        <!-- populated by JS -->
+      </div>
+
+      <div class="mp-totals fade-up d4" id="mp-totals" style="display:none;">
+        <h4>Day total vs target</h4>
+        <div class="mp-totals-row">
+          <div class="mp-total-tile">
+            <div class="mp-total-val" id="mpt-cals">—</div>
+            <div class="mp-total-target" id="mpt-cals-target">/ — cal</div>
+            <div class="mp-total-lbl">Calories</div>
+            <div class="mp-total-bar"><div class="mp-total-bar-fill" id="mpt-cals-bar" style="width:0%"></div></div>
+          </div>
+          <div class="mp-total-tile">
+            <div class="mp-total-val p-color" id="mpt-p">—</div>
+            <div class="mp-total-target" id="mpt-p-target">/ —g</div>
+            <div class="mp-total-lbl">Protein</div>
+            <div class="mp-total-bar"><div class="mp-total-bar-fill" id="mpt-p-bar" style="width:0%"></div></div>
+          </div>
+          <div class="mp-total-tile">
+            <div class="mp-total-val c-color" id="mpt-c">—</div>
+            <div class="mp-total-target" id="mpt-c-target">/ —g</div>
+            <div class="mp-total-lbl">Carbs</div>
+            <div class="mp-total-bar"><div class="mp-total-bar-fill" id="mpt-c-bar" style="width:0%"></div></div>
+          </div>
+          <div class="mp-total-tile">
+            <div class="mp-total-val f-color" id="mpt-f">—</div>
+            <div class="mp-total-target" id="mpt-f-target">/ —g</div>
+            <div class="mp-total-lbl">Fat</div>
+            <div class="mp-total-bar"><div class="mp-total-bar-fill" id="mpt-f-bar" style="width:0%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RECIPE MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal" id="modal-inner">
+    <div class="modal-header">
+      <div></div>
+      <button class="modal-close" onclick="document.getElementById('modal').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+const STATE = {
+  loggedIn: false, name: '',
+  sex: null, age: null, height: null, weight: null, bf: null,
+  trainType: null, trainVolume: null,
+  neat: null,
+  goal: null,
+  cals: null, macros: null, bmrFormula: null
+};
+
+const GOALS = {
+  loss:      { label: 'Fat loss — 300 cal deficit',    adj: -300, p: 40, c: 35, f: 25 },
+  muscle:    { label: 'Muscle gain — 300 cal surplus',  adj: +300, p: 30, c: 45, f: 25 },
+  maintain:  { label: 'Maintenance — TDEE',             adj: 0,    p: 30, c: 40, f: 30 },
+  endurance: { label: 'Endurance performance — TDEE',   adj: 0,    p: 20, c: 55, f: 25 }
+};
+
+// ── TRAINING ENERGY: cal/hr estimates by type (moderate-hard effort)
+// Strength: ~400 cal/hr avg session (compound lifts, rest periods)
+// Endurance: ~600 cal/hr avg (running/cycling moderate intensity)
+// Mixed: ~500 cal/hr
+// General: ~350 cal/hr
+const TRAIN_CAL_PER_HR = { strength: 400, endurance: 600, mixed: 500, general: 350 };
+
+const RECIPES = [
+  // ── ORIGINALS ──
+  { id:1, emoji:'🥚', photo:'spinach eggs feta scramble breakfast', name:'Green egg scramble', desc:'Spinach, feta and eggs — fast protein hit to start the day.', type:'breakfast', tags:['High protein'], cals:380, p:32, c:12, f:22, ingredients:['3 large eggs','100g baby spinach','50g feta, crumbled','1 tsp olive oil','Salt + pepper'], steps:['Heat olive oil in a pan over medium heat.','Add spinach and wilt for 1–2 min.','Whisk eggs, pour in and scramble gently.','Fold in feta, season and serve.'] },
+  { id:2, emoji:'🍗', photo:'grilled chicken rice bowl healthy', name:'Grilled chicken bowl', desc:'Brown rice, roasted veg, tahini dressing. Built for muscle.', type:'lunch', tags:['High protein','Build muscle'], cals:540, p:48, c:52, f:14, ingredients:['180g chicken breast','150g cooked brown rice','1 cup roasted capsicum + zucchini','2 tbsp tahini','Lemon juice, garlic, salt'], steps:['Season chicken and grill 6 min each side.','Rest 5 min then slice.','Assemble bowl with rice, veg and chicken.','Whisk tahini with lemon and garlic, drizzle over.'] },
+  { id:3, emoji:'🥑', photo:'avocado toast poached egg sourdough', name:'Smashed avo toast', desc:'Sourdough, avocado, poached egg, chilli flakes.', type:'breakfast', tags:['Balanced'], cals:420, p:18, c:38, f:24, ingredients:['2 slices sourdough','1 ripe avocado','2 eggs, poached','Chilli flakes','Lemon juice, salt'], steps:['Toast sourdough until golden.','Smash avocado with lemon juice and salt.','Poach eggs for 3 min.','Assemble and top with chilli flakes.'] },
+  { id:4, emoji:'🐟', photo:'salmon fillet sweet potato greens dinner', name:'Salmon + sweet potato', desc:'Omega-3 loaded dinner. Skin-on salmon, roasted sweet potato, greens.', type:'dinner', tags:['High protein','Fat loss'], cals:520, p:42, c:38, f:18, ingredients:['200g salmon fillet, skin on','1 medium sweet potato','2 cups broccolini','1 tbsp olive oil','Lemon, dill, salt'], steps:['Cube sweet potato, roast at 200°C for 25 min.','Season salmon, pan-fry skin-down 4 min, flip 2 min.','Steam broccolini 3–4 min.','Plate with lemon and fresh dill.'] },
+  { id:5, emoji:'🥜', photo:'greek yogurt berries honey bowl', name:'Greek yogurt protein bowl', desc:'Full-fat Greek yogurt, mixed berries, honey, almonds.', type:'snack', tags:['High protein'], cals:290, p:22, c:28, f:10, ingredients:['200g full-fat Greek yogurt','80g mixed berries','1 tbsp honey','20g slivered almonds','Optional: protein powder'], steps:['Spoon yogurt into a bowl.','Top with berries and almonds.','Drizzle with honey.','Stir in protein powder if using.'] },
+  { id:6, emoji:'🥗', photo:'tuna nicoise salad green beans egg', name:'Tuna nicoise', desc:'Performance salad. Green beans, olives, egg, tuna, mustard dressing.', type:'lunch', tags:['High protein','Low carb','Fat loss'], cals:410, p:38, c:14, f:22, ingredients:['185g canned tuna in oil','2 eggs, hard-boiled','100g green beans, blanched','10 kalamata olives','1 tbsp Dijon mustard, 2 tbsp red wine vinegar, 3 tbsp olive oil'], steps:['Blanche green beans 3 min, cool in ice water.','Halve eggs.','Whisk dressing ingredients.','Toss beans, tuna and olives. Top with egg and dressing.'] },
+  { id:7, emoji:'🍜', photo:'chicken pho noodle soup broth', name:'Chicken pho', desc:'Lean broth-based noodle soup. Anti-inflammatory and filling.', type:'dinner', tags:['Endurance','Balanced'], cals:480, p:36, c:52, f:10, ingredients:['160g chicken breast, shredded','100g rice noodles','1L chicken bone broth','Star anise, ginger, cinnamon','Bean sprouts, basil, chilli, lime'], steps:['Simmer broth with spices 20 min.','Add chicken breast and poach 12 min, shred.','Cook noodles per packet.','Assemble bowls, add toppings, serve immediately.'] },
+  { id:8, emoji:'🫐', photo:'overnight oats blueberries chia jar', name:'Oat + berry overnight', desc:'Rolled oats, chia, almond milk, blueberries. Prep the night before.', type:'breakfast', tags:['Endurance','Balanced'], cals:390, p:16, c:58, f:10, ingredients:['80g rolled oats','1 tbsp chia seeds','250ml almond milk','80g blueberries','1 tsp maple syrup'], steps:['Combine oats, chia and almond milk in a jar.','Stir well, refrigerate overnight.','Top with blueberries and maple syrup before serving.'] },
+  { id:9, emoji:'🥩', photo:'beef stir fry broccoli rice wok', name:'Lean beef stir fry', desc:'Rump steak strips, broccolini, snap peas, oyster sauce over jasmine rice.', type:'dinner', tags:['High protein','Build muscle'], cals:580, p:45, c:50, f:16, ingredients:['180g lean rump steak, sliced thin','150g jasmine rice, cooked','100g broccolini','80g snap peas','2 tbsp oyster sauce, sesame oil, garlic, ginger'], steps:['Heat wok on high with sesame oil.','Sear beef 2 min, set aside.','Stir fry veg 3 min, add garlic and ginger.','Return beef, add oyster sauce, toss. Serve on rice.'] },
+  { id:10, emoji:'🧆', photo:'falafel wrap hummus pita flatbread', name:'Falafel wrap', desc:'Baked falafel, hummus, tabouleh, whole wheat wrap.', type:'lunch', tags:['Low carb','Vegetarian'], cals:460, p:18, c:54, f:18, ingredients:['4 baked falafel','1 large whole wheat wrap','3 tbsp hummus','½ cup tabouleh','Cucumber, tomato, lemon'], steps:['Warm wrap in dry pan 1 min.','Spread hummus across the base.','Layer falafel, tabouleh and veg.','Roll tightly and slice on the diagonal.'] },
+  { id:11, emoji:'🍳', photo:'protein pancakes banana stack berries', name:'Protein pancakes', desc:'Banana oat protein pancakes. No flour, no fuss.', type:'breakfast', tags:['High protein','Build muscle'], cals:340, p:28, c:36, f:8, ingredients:['1 banana, mashed','2 eggs','40g oats, blended','1 scoop vanilla protein powder','Cinnamon, coconut oil for pan'], steps:['Blend all ingredients until smooth.','Heat a lightly oiled pan on medium.','Pour small rounds, cook 2 min each side.','Serve with berries or Greek yogurt.'] },
+  { id:12, emoji:'🥦', photo:'edamame rice bowl miso sesame', name:'Edamame + rice bowl', desc:'Plant-based power bowl. Edamame, brown rice, miso dressing, sesame.', type:'lunch', tags:['Endurance','Vegetarian'], cals:440, p:22, c:60, f:14, ingredients:['150g cooked brown rice','100g shelled edamame','1 tbsp white miso','1 tbsp rice vinegar','Sesame seeds, spring onion, cucumber'], steps:['Whisk miso with rice vinegar and 1 tbsp warm water.','Build bowl with rice and edamame.','Add cucumber and spring onion.','Drizzle miso dressing and scatter sesame seeds.'] },
+  // ── STEALTH HEALTH ──
+  { id:13, emoji:'🍛', photo:'butter chicken rice bowl curry', name:'Slow cooker butter chicken', desc:'34g protein per bowl. Cottage cheese makes the sauce creamy without the cream.', type:'dinner', tags:['High protein','Build muscle','Meal prep'], source:'Stealth Health', sourceUrl:'https://www.tiktok.com/@stealth_health_life', cals:460, p:38, c:50, f:11, ingredients:['900g chicken breast, diced','2 onions, chopped','2 tbsp each: tomato paste, garlic paste, ginger paste, garam masala, paprika','1 tsp cayenne, 1 tsp cumin, 1 tsp coriander','400g crushed fire-roasted tomatoes','250g fat-free Greek yogurt','30g butter','420g basmati rice (cooked, for serving)'], steps:['Sauté onions with butter until soft, add all spices and tomato paste, cook 2 min.','Add garlic paste, ginger paste, tomatoes and 120ml water. Stir well.','Add chicken. Cook on high 2–3 hrs or low 3–4 hrs in slow cooker.','Stir through Greek yogurt for creaminess. Serve over rice.'] },
+  { id:14, emoji:'🌯', photo:'buffalo chicken burrito meal prep wrap', name:'Buffalo chicken burritos', desc:'Sheet-pan meal prep. 44g protein, freezer-friendly.', type:'dinner', tags:['High protein','Meal prep'], source:'Stealth Health', sourceUrl:'https://www.tiktok.com/@stealth_health_life', cals:475, p:44, c:37, f:17, ingredients:['1.35kg boneless chicken thighs or breast, diced','120g buffalo sauce','40g tomato paste, 40g honey, 30g Worcestershire sauce','500g sweet potato, cubed','2 sweet onions, diced','180g reduced-fat cheddar','150g fat-free Greek yogurt','12 high-protein burrito tortillas'], steps:['Roast sweet potato and onion at 200°C for 20 min.','Toss chicken with buffalo sauce, honey, tomato paste, Worcestershire. Add to tray, roast 15 min.','Mix in cheese and yogurt. Divide across tortillas.','Roll tightly. Eat now or freeze individually.'] },
+  { id:15, emoji:'🍣', photo:'tuna poke bowl sushi rice sesame', name:'Ahi tuna poke bowl', desc:'44g protein. The recipe Tom eats 2–3 times a week.', type:'lunch', tags:['High protein','Low carb','Fat loss'], source:'Stealth Health', sourceUrl:'https://www.tiktok.com/@stealth_health_life', cals:530, p:44, c:66, f:11, ingredients:['450g ahi tuna, diced','2 tbsp soy sauce, 1 tbsp yuzu ponzu, 1 tsp sesame oil, 2 tsp honey','2 tbsp diced white onion','Spicy mayo: 30g light mayo, 20g gochujang, 10g sriracha','150g sushi rice (cooked)','Toppings: edamame, cucumber, avocado, sesame seeds, spring onion'], steps:['Marinate tuna in soy sauce, ponzu, sesame oil and honey for 10 min.','Mix spicy mayo ingredients.','Build bowl: rice base, tuna, all toppings.','Drizzle spicy mayo. Serve immediately.'] },
+  { id:16, emoji:'🧀', photo:'mac and cheese pasta creamy comfort food', name:'Cottage cheese mac & cheese', desc:'38g protein. Looks indulgent, eats lean.', type:'dinner', tags:['High protein','Meal prep'], source:'Stealth Health', sourceUrl:'https://www.tiktok.com/@stealth_health_life', cals:500, p:38, c:61, f:10, ingredients:['3 boxes mac & cheese','600g 2% cottage cheese, blended smooth','340g chicken breast, cooked and diced','6g truffle oil (1 tsp)','Splash of white wine vinegar, garlic powder, salt, pepper'], steps:['Cook mac & cheese per packet instructions.','Blend cottage cheese until completely smooth — no lumps.','Mix blended cottage cheese into mac with truffle oil and vinegar.','Stir in diced chicken. Season, divide into 6 portions.'] },
+  { id:17, emoji:'🍯', photo:'honey garlic chicken rice bowl', name:'Honey garlic chicken & rice', desc:'37g protein. Five-ingredient marinade, serious flavour.', type:'dinner', tags:['High protein','Meal prep'], source:'Stealth Health', sourceUrl:'https://www.tiktok.com/@stealth_health_life', cals:495, p:37, c:59, f:13, ingredients:['800g chicken breast, cubed','Marinade: 1 tbsp chili crisp, 1 tbsp garlic powder, 2 tbsp soy sauce, 1 tbsp avocado oil','Sauce: 2 tbsp soy sauce, 1 tsp garlic, 1 tbsp chili crisp, 4 tbsp honey, 1 tbsp mirin','650g cooked rice','½ cup each: green onion, diced onion'], steps:['Marinate chicken 30 min minimum.','Sear chicken in batches on high heat until cooked through.','Add sauce, toss to coat, simmer 2 min until sticky.','Serve over rice, top with green onion.'] },
+  // ── ONTRAC5 ──
+  { id:18, emoji:'🥙', photo:'chicken roll sandwich slaw yogurt sauce', name:'Chicken roll', desc:'Simple and dialled. Lean chicken, slaw, yogurt sauce in a soft roll.', type:'lunch', tags:['High protein','Fat loss'], source:'OnTrac5', sourceUrl:'https://www.ontrac5.com', cals:480, p:42, c:44, f:12, ingredients:['180g chicken breast, grilled and sliced','1 soft bread roll or wrap','50g Greek yogurt mixed with garlic and lemon','½ cup shredded cabbage + carrot slaw','Tomato, cucumber, hot sauce'], steps:['Season and grill chicken breast 6 min each side. Rest and slice.','Mix yogurt with garlic, lemon juice, salt.','Shred cabbage and carrot, dress lightly with vinegar.','Layer everything in the roll. Add hot sauce to taste.'] },
+  { id:19, emoji:'🍝', photo:'beef bolognese pasta parmesan', name:'Beef bolognese', desc:'680 cal athlete portion. Lean mince, proper sauce, high-protein pasta.', type:'dinner', tags:['High protein','Build muscle','Endurance'], source:'OnTrac5', sourceUrl:'https://www.ontrac5.com/recipes/beef-bolognese', cals:680, p:52, c:72, f:16, ingredients:['500g extra-lean beef mince (5% fat)','400g crushed tomatoes','2 tbsp tomato paste, 1 tbsp Worcestershire sauce','1 onion, 3 garlic cloves, 1 carrot, diced','250g high-protein pasta','Parmesan, fresh basil'], steps:['Brown mince in a large pan, drain excess fat.','Add onion, garlic, carrot — soften 5 min.','Add tomatoes, paste, Worcestershire. Simmer 25 min.','Cook pasta, reserve 100ml water. Combine, add pasta water to loosen.'] },
+  { id:20, emoji:'🥘', photo:'taco bowl crispy potato black beans salsa', name:'Smashed potato taco bowl', desc:'Crispy smashed potatoes as the base. Proper weeknight dinner.', type:'dinner', tags:['Balanced','Build muscle'], source:'OnTrac5', sourceUrl:'https://www.ontrac5.com/recipes/smashed-potato-taco-bowls', cals:560, p:38, c:64, f:14, ingredients:['600g baby potatoes, boiled then smashed','400g chicken breast or lean mince, seasoned with taco spices','1 can black beans, drained','Salsa, reduced-fat cheese, Greek yogurt','Lime, coriander, jalapeño'], steps:['Boil potatoes until tender. Smash flat, drizzle with oil, roast 200°C 20 min until crispy.','Cook seasoned chicken or mince in a pan.','Warm black beans, season with cumin and salt.','Build bowl: crispy potatoes, protein, beans, salsa, yogurt, toppings.'] },
+  { id:21, emoji:'🫙', photo:'greek yogurt granola fruit berries breakfast', name:'Greek yogurt bowl', desc:'Quick 480 cal breakfast. Protein-forward with fruit and crunch.', type:'breakfast', tags:['High protein','Fat loss'], source:'OnTrac5', sourceUrl:'https://www.ontrac5.com/recipes/greek-yoghurt-bowl', cals:480, p:34, c:52, f:12, ingredients:['250g fat-free Greek yogurt','1 scoop vanilla protein powder','80g mixed berries','30g granola (low-sugar)','1 tbsp honey','1 tbsp natural peanut butter'], steps:['Mix protein powder into yogurt until smooth.','Spoon into a bowl.','Top with berries and granola.','Drizzle honey and peanut butter. Serve immediately.'] },
+  // ── RECIPETINEATS ──
+  { id:22, emoji:'🍋', photo:'baked fish lemon garlic butter white fish', name:'Garlic butter baked fish', desc:'White fish, garlic, lemon, butter. 35 min, one pan.', type:'dinner', tags:['High protein','Low carb','Fat loss'], source:'RecipeTin Eats', sourceUrl:'https://www.recipetineats.com', cals:340, p:38, c:6, f:18, ingredients:['4 × 180g white fish fillets (barramundi or snapper)','3 tbsp butter','4 garlic cloves, minced','Zest + juice of 1 lemon','Fresh parsley, salt, pepper, paprika'], steps:['Preheat oven to 200°C. Pat fish dry, season with paprika, salt and pepper.','Melt butter in oven-proof pan. Sauté garlic 1 min.','Add fish, spoon butter over top. Bake 12–15 min until just cooked.','Finish with lemon juice, zest and parsley.'] },
+  { id:23, emoji:'🥘', photo:'chicken rice one pan skillet dinner', name:'Chicken and rice one-pan', desc:'One pan, 30 minutes. Proper comfort food with no macro regret.', type:'dinner', tags:['High protein','Balanced','Meal prep'], source:'RecipeTin Eats', sourceUrl:'https://www.recipetineats.com', cals:510, p:40, c:52, f:12, ingredients:['600g chicken thighs, bone-in or boneless','1½ cups long grain rice','2½ cups chicken stock','1 onion, 3 garlic cloves, 1 tsp paprika, 1 tsp cumin','Lemon, parsley, salt + pepper'], steps:['Season chicken and sear in oven-proof pan 3 min each side. Remove.','Sauté onion and garlic, add paprika and cumin, cook 1 min.','Add rice and stock, bring to boil. Nestle chicken on top.','Cover and bake 180°C for 25 min. Rest 5 min. Finish with lemon and parsley.'] },
+  { id:24, emoji:'🥤', photo:'berry protein smoothie purple blender', name:'Berry protein smoothie', desc:'310 cal, quick and done. Pre-training fuel in 3 minutes.', type:'snack', tags:['High protein','Endurance'], source:'OnTrac5', sourceUrl:'https://www.ontrac5.com/recipes/berry-protein-smoothie', cals:310, p:30, c:32, f:6, ingredients:['1 scoop vanilla or berry protein powder','150g frozen mixed berries','200ml low-fat milk or oat milk','100g fat-free Greek yogurt','½ banana (optional, for thickness)'], steps:['Add all ingredients to blender.','Blend on high 30 seconds until smooth.','Adjust thickness with extra milk if needed.','Drink immediately — best right before training.'] }
+];
+
+let currentFilter = 'all';
+
+function el(id){ return document.getElementById(id); }
+
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  el('screen-'+name).classList.add('active');
+  const hasNav = ['recipes','results','mealplan'].includes(name);
+  el('main-nav').style.display = hasNav ? 'flex' : 'none';
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  if(name === 'recipes') el('nl-recipes').classList.add('active');
+  if(name === 'results') el('nl-results').classList.add('active');
+  if(name === 'mealplan') el('nl-mealplan').classList.add('active');
+  if(name === 'recipes') renderRecipes();
+  if(name === 'results') renderResults();
+  if(name === 'mealplan') renderMealPlanScreen();
+}
+
+function doLogin(){
+  const email = el('login-email').value;
+  STATE.loggedIn = true;
+  STATE.name = email ? email.split('@')[0] : 'there';
+  STATE.name = STATE.name.charAt(0).toUpperCase() + STATE.name.slice(1);
+  el('nav-username').textContent = STATE.name;
+  showScreen('onboarding');
+}
+
+function skipLogin(){
+  STATE.loggedIn = false; STATE.name = '';
+  el('main-nav').style.display = 'none';
+  showScreen('recipes');
+}
+
+function logout(){
+  Object.assign(STATE,{loggedIn:false,name:'',sex:null,age:null,height:null,weight:null,bf:null,
+    trainType:null,trainVolume:null,neat:null,goal:null,cals:null,macros:null,bmrFormula:null});
+  el('main-nav').style.display='none';
+  // reset onboarding panels
+  document.querySelectorAll('.step-panel').forEach(p=>p.classList.remove('active'));
+  el('panel-0').classList.add('active');
+  updatePips(0);
+  Object.keys(picks).forEach(k=>delete picks[k]);
+  showScreen('login');
+}
+
+// ── ONBOARDING ──
+const picks = {};
+
+function pick(key, val, btn){
+  picks[key] = val;
+  const group = btn.closest('.toggle-group, .neat-grid, .goal-grid');
+  if(group) group.querySelectorAll('.toggle-btn,.neat-card,.goal-card').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+}
+
+function pickTrain(type, btn){
+  picks.trainType = type;
+  el('train-grid').querySelectorAll('.train-card').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  // Show volume field and update label/unit
+  el('volume-field').style.display = 'block';
+  el('volume-label').textContent = 'Training volume';
+  el('volume-unit').textContent = 'hrs / week';
+}
+
+function updatePips(step){
+  [0,1,2,3,4].forEach(i=>{
+    const p = el('pip'+i);
+    if(!p) return;
+    p.className = 'step-pip' + (i<step?' done': i===step?' active':'');
+  });
+}
+
+function nextStep(current){
+  if(current === 0){
+    if(!picks.sex){ alert('Please select your biological sex.'); return; }
+    STATE.sex = picks.sex;
+    STATE.age = parseFloat(el('f-age').value);
+    STATE.height = parseFloat(el('f-height').value);
+    STATE.weight = parseFloat(el('f-weight').value);
+    if(!STATE.age || !STATE.height || !STATE.weight){ alert('Please fill in all fields.'); return; }
+    const bfVal = parseFloat(el('f-bf').value);
+    STATE.bf = (!isNaN(bfVal) && bfVal > 0) ? bfVal : null;
+  }
+  if(current === 1){
+    if(!picks.trainType){ alert('Please select your training type.'); return; }
+    STATE.trainType = picks.trainType;
+    const vol = parseFloat(el('f-volume').value);
+    STATE.trainVolume = (!isNaN(vol) && vol >= 0) ? vol : 0;
+  }
+  if(current === 2){
+    if(picks.neat === undefined || picks.neat === null){ alert('Please select your daily activity level.'); return; }
+    STATE.neat = picks.neat;
+  }
+  el('panel-'+current).classList.remove('active');
+  el('panel-'+(current+1)).classList.add('active');
+  updatePips(current+1);
+}
+
+function prevStep(current){
+  el('panel-'+current).classList.remove('active');
+  el('panel-'+(current-1)).classList.add('active');
+  updatePips(current-1);
+}
+
+// ── CALCULATION ENGINE ──
+function calculate(){
+  if(!picks.goal){ alert('Please select your goal.'); return; }
+  STATE.goal = picks.goal;
+
+  const { sex, age, height, weight, bf, trainType, trainVolume, neat, goal } = STATE;
+
+  // 1. BMR
+  let bmr;
+  if(bf !== null){
+    // Katch-McArdle: BMR = 370 + (21.6 × LBM in kg)
+    const lbm = weight * (1 - bf / 100);
+    bmr = 370 + 21.6 * lbm;
+    STATE.bmrFormula = 'Katch-McArdle';
+  } else {
+    // Mifflin-St Jeor
+    bmr = sex === 'male'
+      ? 10 * weight + 6.25 * height - 5 * age + 5
+      : 10 * weight + 6.25 * height - 5 * age - 161;
+    STATE.bmrFormula = 'Mifflin-St Jeor';
+  }
+
+  // 2. Exercise energy expenditure (EEE) — cal/hr × hrs/week ÷ 7 = daily average
+  const calPerHr = TRAIN_CAL_PER_HR[trainType] || 400;
+  const eeeDaily = Math.round((calPerHr * (trainVolume || 0)) / 7);
+
+  // 3. NEAT adjustment (daily cal from non-exercise movement)
+  const neatAdj = neat || 0;
+
+  // 4. TDEE = BMR + EEE + NEAT
+  const tdee = Math.round(bmr + eeeDaily + neatAdj);
+
+  // 5. Goal calorie adjustment
+  const g = GOALS[goal];
+  const cals = tdee + g.adj;
+  STATE.cals = cals;
+  STATE.tdee = tdee;
+
+  // 6. Macro calculation — priority order: protein → fat → carbs fill remainder
+  //    Protein: goal % as base, floor by training type, hard ceiling at 2.2g/kg (ISSN upper practical limit)
+  //    Fat: goal % as base, floor at 0.8g/kg (hormonal/absorption minimum)
+  //    Carbs: fill remaining calories — never forced to exceed budget
+  const proteinFloors = { strength: 1.8, endurance: 1.6, mixed: 1.6, general: 1.4 };
+  const PROTEIN_CEIL  = 2.2; // g/kg — upper practical limit regardless of goal
+
+  const pgFromPct = Math.round(cals * g.p / 100 / 4);
+  const pgFloor   = Math.round(proteinFloors[trainType] * weight);
+  const pgCeil    = Math.round(PROTEIN_CEIL * weight);
+  let pg = Math.min(Math.max(pgFromPct, pgFloor), pgCeil);
+
+  const fgFromPct = Math.round(cals * g.f / 100 / 9);
+  const fgFloor   = Math.round(0.8 * weight);
+  let fg = Math.max(fgFromPct, fgFloor);
+
+  // Carbs fill the remaining calorie budget
+  let cg = Math.max(Math.round((cals - pg * 4 - fg * 9) / 4), 0);
+
+  // Calculate actual % from final grams, round to nearest 5 for display
+  const roundTo5 = v => Math.round(v / 5) * 5;
+  let pPct = roundTo5(pg * 4 / cals * 100);
+  let fPct = roundTo5(fg * 9 / cals * 100);
+  let cPct = 100 - pPct - fPct; // carbs absorb rounding so total always = 100%
+
+  STATE.macros = { p: pPct, c: cPct, f: fPct, pg, cg, fg };
+
+  showScreen('results');
+}
+
+function renderResults(){
+  if(!STATE.cals) return;
+  const { cals, macros, goal, name, bmrFormula, trainType, bf } = STATE;
+  const g = GOALS[goal];
+
+  el('results-title').textContent = name ? `Here's what your body needs, ${name}.` : "Here's what your body needs.";
+  el('r-cals').textContent = cals.toLocaleString();
+  el('r-goal-label').textContent = g.label;
+
+  el('r-p-pct').textContent = macros.p+'%'; el('r-p-g').textContent = macros.pg+'g'; el('r-p-kcal').textContent = Math.round(macros.pg*4)+' kcal';
+  el('r-c-pct').textContent = macros.c+'%'; el('r-c-g').textContent = macros.cg+'g'; el('r-c-kcal').textContent = Math.round(macros.cg*4)+' kcal';
+  el('r-f-pct').textContent = macros.f+'%'; el('r-f-g').textContent = macros.fg+'g'; el('r-f-kcal').textContent = Math.round(macros.fg*9)+' kcal';
+
+  el('mfp-cals').textContent = cals.toLocaleString();
+  el('mfp-p').textContent = macros.p; el('mfp-c').textContent = macros.c; el('mfp-f').textContent = macros.f;
+
+  // Dynamic formula note
+  const trainLabel = { strength:'strength', endurance:'endurance', mixed:'mixed', general:'general fitness' }[trainType] || trainType;
+  el('formula-note').textContent = `BMR via ${bmrFormula}${bf ? ' (body fat % applied)' : ''}. TDEE = BMR + ${trainLabel} exercise energy + daily activity. Macro floors from ISSN guidelines.`;
+}
+
+// ── RECIPES ──
+
+// ── IMAGE HELPERS ──
+function recipeImgTag(r, height='160'){
+  const query = encodeURIComponent((r.photo || r.name) + ' food');
+  const src = `https://source.unsplash.com/600x${height}/?${query}`;
+  return `<img src="${src}" alt="${r.name}" loading="lazy"
+    onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+    <span class="emoji-fallback" style="display:none">${r.emoji}</span>`;
+}
+
+function filterRecipes(tag, btn){
+  currentFilter = tag;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderRecipes();
+}
+
+function renderRecipes(){
+  const banner = el('profile-banner');
+  if(STATE.cals){
+    banner.style.display='flex';
+    el('pb-nums').innerHTML = `<strong>${STATE.cals.toLocaleString()} cal</strong> &nbsp;·&nbsp; ${STATE.macros.pg}g protein &nbsp;·&nbsp; ${STATE.macros.cg}g carbs &nbsp;·&nbsp; ${STATE.macros.fg}g fat`;
+  } else { banner.style.display='none'; }
+
+  let filtered = currentFilter==='all' ? RECIPES :
+    RECIPES.filter(r => r.type===currentFilter || r.tags.some(t=>t.toLowerCase().replace(' ','-')===currentFilter));
+
+  const grid = el('recipe-grid');
+  if(!filtered.length){ grid.innerHTML='<div class="empty"><h3>No recipes found.</h3><p>Try a different filter.</p></div>'; return; }
+
+  grid.innerHTML = filtered.map(r=>`
+    <div class="recipe-card" onclick="openModal(${r.id})">
+      <div class="recipe-img">${recipeImgTag(r,'320')}</div>
+      <div class="recipe-body">
+        <div class="recipe-tags">
+          <span class="recipe-tag tag-type">${r.type}</span>
+          ${r.tags.map(t=>`<span class="recipe-tag tag-goal">${t}</span>`).join('')}
+        </div>
+        <div class="recipe-name">${r.name}</div>
+        <div class="recipe-desc">${r.desc}</div>
+        <div class="recipe-macros">
+          <div class="recipe-macro"><strong>${r.cals}</strong> cal</div>
+          <div class="recipe-macro"><strong>${r.p}g</strong> protein</div>
+          <div class="recipe-macro"><strong>${r.c}g</strong> carbs</div>
+          <div class="recipe-macro"><strong>${r.f}g</strong> fat</div>
+        </div>
+        ${r.source ? `<div style="margin-top:8px;padding-top:8px;border-top:0.5px solid var(--border);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--ink-faint);">${r.source}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function openModal(id){
+  const r = RECIPES.find(x=>x.id===id);
+  if(!r) return;
+  const sourceHtml = r.source
+    ? `<div style="margin-bottom:14px;padding:10px 12px;background:var(--cream-mid);border-radius:3px;border:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink-light);">Via ${r.source}</span>
+        <a href="${r.sourceUrl}" target="_blank" rel="noopener" style="font-size:11px;font-weight:600;color:var(--green);text-decoration:none;letter-spacing:0.3px;">View source →</a>
+       </div>`
+    : '';
+  el('modal-body').innerHTML = `
+    <div class="modal-img">${recipeImgTag(r,'400')}</div>
+    <div class="modal-tags" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+      <span class="recipe-tag tag-type">${r.type}</span>
+      ${r.tags.map(t=>`<span class="recipe-tag tag-goal">${t}</span>`).join('')}
+    </div>
+    <div class="modal-title">${r.name}</div>
+    <div class="modal-sub">${r.desc}</div>
+    <div class="modal-macro-row">
+      <div class="modal-macro"><div class="val">${r.cals}</div><div class="lbl">Calories</div></div>
+      <div class="modal-macro"><div class="val p-color">${r.p}g</div><div class="lbl">Protein</div></div>
+      <div class="modal-macro"><div class="val c-color">${r.c}g</div><div class="lbl">Carbs</div></div>
+      <div class="modal-macro"><div class="val f-color">${r.f}g</div><div class="lbl">Fat</div></div>
+    </div>
+    ${sourceHtml}
+    <div class="modal-section"><h4>Ingredients</h4>
+      <ul class="ingredient-list">${r.ingredients.map(i=>`<li>${i}</li>`).join('')}</ul>
+    </div>
+    <div class="modal-section"><h4>Method</h4>
+      <ol class="step-list">${r.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
+    </div>
+  `;
+  el('modal').classList.add('open');
+}
+
+function closeModal(e){
+  if(e.target===el('modal')) el('modal').classList.remove('open');
+}
+
+// ── AI RECIPE GENERATOR ──
+let aiGeneratedRecipe = null;
+
+function setAILoading(on){
+  el('ai-loading').style.display = on ? 'flex' : 'none';
+  el('ai-btn').disabled = on;
+  el('ai-prompt').disabled = on;
+  if(on){ el('ai-error').style.display='none'; }
+}
+
+function showAIError(msg){
+  const e = el('ai-error');
+  e.textContent = msg;
+  e.style.display = 'block';
+}
+
+function renderAICard(r){
+  const container = el('ai-card-container');
+  const query = encodeURIComponent((r.photo || r.name) + ' food');
+  const imgSrc = `https://source.unsplash.com/600x320/?${query}`;
+  container.innerHTML = `
+    <div class="ai-generated-card">
+      <div class="ai-generated-header">
+        <span class="ai-generated-label">Generated for your targets</span>
+        <button class="ai-add-btn" id="ai-add-btn" onclick="addAIRecipeToLibrary()">Add to library</button>
+      </div>
+      <div class="ai-card-body">
+        <div class="ai-card-img">
+          <img src="${imgSrc}" alt="${r.name}" loading="lazy"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+          <span class="emoji-fallback" style="display:none">${r.emoji || '🍽️'}</span>
+        </div>
+        <div class="ai-card-name">${r.name}</div>
+        <div class="ai-card-desc">${r.desc}</div>
+        <div class="ai-card-macros">
+          <div class="ai-card-macro"><div class="val">${r.cals}</div><div class="lbl">Cal</div></div>
+          <div class="ai-card-macro"><div class="val p-color">${r.p}g</div><div class="lbl">Protein</div></div>
+          <div class="ai-card-macro"><div class="val c-color">${r.c}g</div><div class="lbl">Carbs</div></div>
+          <div class="ai-card-macro"><div class="val f-color">${r.f}g</div><div class="lbl">Fat</div></div>
+        </div>
+        <div class="ai-card-section">
+          <h4>Ingredients</h4>
+          <ul class="ingredient-list">${r.ingredients.map(i=>`<li>${i}</li>`).join('')}</ul>
+        </div>
+        <div class="ai-card-section">
+          <h4>Method</h4>
+          <ol class="step-list">${r.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
+        </div>
+      </div>
+    </div>
+  `;
+  container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function addAIRecipeToLibrary(){
+  if(!aiGeneratedRecipe) return;
+  const btn = el('ai-add-btn');
+  if(btn.classList.contains('added')) return;
+  RECIPES.push(aiGeneratedRecipe);
+  btn.textContent = 'Added /';
+  btn.classList.add('added');
+  renderRecipes();
+}
+
+async function generateRecipe(){
+  const prompt = el('ai-prompt').value.trim();
+  if(!prompt){ el('ai-prompt').focus(); return; }
+
+  const macroContext = STATE.cals
+    ? `User's daily targets: ${STATE.cals} cal, ${STATE.macros.pg}g protein, ${STATE.macros.cg}g carbs, ${STATE.macros.fg}g fat. Goal: ${STATE.goal}. Training type: ${STATE.trainType}.`
+    : 'No profile set — generate a balanced, high-protein recipe.';
+
+  setAILoading(true);
+  el('ai-card-container').innerHTML = '';
+  aiGeneratedRecipe = null;
+
+  try {
+    const res = await fetch('/.netlify/functions/ai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: 'You are a sports nutritionist and chef. Always respond with valid JSON only — no markdown, no backticks, no extra text.',
+        messages: [{
+          role: 'user',
+          content: `${macroContext}
+
+The user wants: "${prompt}"
+
+Return a single JSON object with exactly these fields:
+{
+  "name": "Recipe name",
+  "desc": "One-line description, max 12 words.",
+  "type": "breakfast|lunch|dinner|snack",
+  "tags": ["High protein"],
+  "cals": 480,
+  "p": 42,
+  "c": 38,
+  "f": 14,
+  "photo": "2-4 word unsplash search query describing the dish",
+  "emoji": "single emoji",
+  "ingredients": ["180g chicken breast", "150g brown rice"],
+  "steps": ["Step one.", "Step two."]
+}
+
+Rules:
+- tags from: High protein, Low carb, Fat loss, Build muscle, Endurance, Balanced, Meal prep, Vegetarian
+- macros must be realistic: p×4 + c×4 + f×9 ≈ cals
+- 4–6 ingredients, 3–5 steps
+- photo: descriptive food photography keywords for the dish`
+        }]
+      })
+    });
+
+    const data = await res.json();
+    const raw = data.content?.[0]?.text || '';
+
+    let recipe;
+    try {
+      const clean = raw.replace(/\`\`\`json|\`\`\`/gi, '').trim();
+      recipe = JSON.parse(clean);
+    } catch(e) {
+      showAIError('Could not parse the recipe. Try rephrasing your request.');
+      setAILoading(false);
+      return;
+    }
+
+    const required = ['name','desc','type','cals','p','c','f','ingredients','steps'];
+    if(required.some(k => recipe[k] === undefined)){
+      showAIError('Recipe was incomplete. Please try again.');
+      setAILoading(false);
+      return;
+    }
+
+    recipe.id = Date.now();
+    recipe.source = 'AI generated';
+    recipe.tags = Array.isArray(recipe.tags) ? recipe.tags : [];
+    recipe.emoji = recipe.emoji || '🍽️';
+
+    aiGeneratedRecipe = recipe;
+    renderAICard(recipe);
+
+  } catch(err) {
+    showAIError('Network error. Check your connection and try again.');
+  }
+
+  setAILoading(false);
+}
+
+// Enter key on AI input
+el('ai-prompt').addEventListener('keydown', e => { if(e.key==='Enter') generateRecipe(); });
+
+// ── MANUAL ENTRY SHORTCUT ──
+let manualGoalPick = null;
+
+function openManualEntry(){
+  manualGoalPick = null;
+  // Clear fields
+  ['m-cals','m-p','m-c','m-f'].forEach(id => { el(id).value = ''; });
+  document.querySelectorAll('.manual-goal-btn').forEach(b => b.classList.remove('on'));
+  el('manual-error').style.display = 'none';
+  el('manual-overlay').classList.add('open');
+  el('m-cals').focus();
+}
+
+function closeManualEntry(e){
+  if(e && e.target !== el('manual-overlay')) return;
+  el('manual-overlay').classList.remove('open');
+}
+
+function pickManualGoal(val, btn){
+  manualGoalPick = val;
+  document.querySelectorAll('.manual-goal-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+}
+
+function submitManualEntry(){
+  const errEl = el('manual-error');
+  errEl.style.display = 'none';
+
+  const cals = parseFloat(el('m-cals').value);
+  const pg   = parseFloat(el('m-p').value);
+  const cg   = parseFloat(el('m-c').value);
+  const fg   = parseFloat(el('m-f').value);
+
+  if(!cals || !pg || isNaN(cg) || !fg){
+    errEl.textContent = 'Please fill in calories, protein, carbs and fat.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if(!manualGoalPick){
+    errEl.textContent = 'Please select a goal.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  // Sanity check — macros should roughly add up to calories
+  const macrosCals = Math.round(pg * 4 + cg * 4 + fg * 9);
+  if(Math.abs(macrosCals - cals) > cals * 0.15){
+    errEl.textContent = `Macros add up to ~${macrosCals} cal but you entered ${cals} cal. Check your numbers.`;
+    errEl.style.display = 'block';
+    return;
+  }
+
+  // Set STATE — enough for meal plan + results to work
+  STATE.cals   = Math.round(cals);
+  STATE.tdee   = Math.round(cals);
+  STATE.goal   = manualGoalPick;
+  STATE.trainType = 'general'; // safe default — won't affect display
+  STATE.bmrFormula = 'Manual entry';
+  STATE.loggedIn = true;
+  STATE.name = el('login-email').value
+    ? el('login-email').value.split('@')[0].charAt(0).toUpperCase() + el('login-email').value.split('@')[0].slice(1)
+    : '';
+
+  // Compute % from grams for display on results screen
+  const roundTo5 = v => Math.round(v / 5) * 5;
+  const pPct = roundTo5(pg * 4 / cals * 100);
+  const fPct = roundTo5(fg * 9 / cals * 100);
+  const cPct = 100 - pPct - fPct;
+
+  STATE.macros = { p: pPct, c: cPct, f: fPct, pg: Math.round(pg), cg: Math.round(cg), fg: Math.round(fg) };
+
+  if(STATE.name) el('nav-username').textContent = STATE.name;
+  el('main-nav').style.display = 'flex';
+  el('manual-overlay').classList.remove('open');
+  showScreen('mealplan');
+}
+
+// ── MEAL PLAN ──
+let currentMealPlan = null; // { breakfast, lunch, dinner, snack }
+let savedMealSlots = new Set(); // track which slots have been saved to library
+
+function renderMealPlanScreen(){
+  if(!STATE.cals){
+    el('mp-no-profile').style.display = 'block';
+    el('mp-has-profile').style.display = 'none';
+    return;
+  }
+  el('mp-no-profile').style.display = 'none';
+  el('mp-has-profile').style.display = 'block';
+
+  // Populate target bar
+  el('mp-target-cals').textContent = STATE.cals.toLocaleString() + ' cal';
+  el('mp-target-p').textContent = STATE.macros.pg + 'g';
+  el('mp-target-c').textContent = STATE.macros.cg + 'g';
+  el('mp-target-f').textContent = STATE.macros.fg + 'g';
+
+  // If we have a plan already, re-render it
+  if(currentMealPlan){
+    renderMealSlots(currentMealPlan);
+  } else {
+    el('mp-slots').innerHTML = '';
+    el('mp-totals').style.display = 'none';
+  }
+}
+
+function mpSkeletons(){
+  const meals = ['Breakfast','Lunch','Dinner','Snack'];
+  el('mp-slots').innerHTML = meals.map(m => `
+    <div class="mp-skeleton">
+      <div class="mp-skeleton-header"></div>
+      <div class="mp-skeleton-body">
+        <div class="mp-skeleton-img"></div>
+        <div class="mp-skeleton-lines">
+          <div class="mp-skeleton-line w80"></div>
+          <div class="mp-skeleton-line w60"></div>
+          <div class="mp-skeleton-line w40"></div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  el('mp-totals').style.display = 'none';
+}
+
+function renderMealSlots(plan){
+  savedMealSlots = new Set();
+  const slots = [
+    { key: 'breakfast', label: 'Breakfast' },
+    { key: 'lunch',     label: 'Lunch' },
+    { key: 'dinner',    label: 'Dinner' },
+    { key: 'snack',     label: 'Snack' }
+  ];
+
+  el('mp-slots').innerHTML = slots.map(({ key, label }) => {
+    const r = plan[key];
+    if(!r) return '';
+    const query = encodeURIComponent((r.photo || r.name) + ' food');
+    const imgSrc = `https://source.unsplash.com/320x320/?${query}`;
+    return `
+      <div class="mp-slot fade-in">
+        <div class="mp-slot-header">
+          <span class="mp-slot-label">${label}</span>
+          <span class="mp-slot-cals">${r.cals} cal</span>
+        </div>
+        <div class="mp-slot-body">
+          <div class="mp-slot-img">
+            <img src="${imgSrc}" alt="${r.name}" loading="lazy"
+              onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+            <span class="emoji-fallback" style="display:none">${r.emoji || '🍽️'}</span>
+          </div>
+          <div class="mp-slot-info">
+            <div class="mp-slot-name">${r.name}</div>
+            <div class="mp-slot-desc">${r.desc}</div>
+            <div class="mp-slot-macros">
+              <div class="mp-slot-macro"><strong>${r.p}g</strong> protein</div>
+              <div class="mp-slot-macro"><strong>${r.c}g</strong> carbs</div>
+              <div class="mp-slot-macro"><strong>${r.f}g</strong> fat</div>
+            </div>
+            <div class="mp-slot-actions">
+              <button class="mp-slot-view" onclick="openMealPlanModal('${key}')">View recipe</button>
+              <button class="mp-slot-save" id="mps-save-${key}" onclick="saveMealToLibrary('${key}')">Save to library</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Render day totals
+  renderDayTotals(plan);
+}
+
+function renderDayTotals(plan){
+  const keys = ['breakfast','lunch','dinner','snack'];
+  const total = { cals:0, p:0, c:0, f:0 };
+  keys.forEach(k => {
+    if(plan[k]){
+      total.cals += plan[k].cals || 0;
+      total.p    += plan[k].p    || 0;
+      total.c    += plan[k].c    || 0;
+      total.f    += plan[k].f    || 0;
+    }
+  });
+
+  const target = { cals: STATE.cals, p: STATE.macros.pg, c: STATE.macros.cg, f: STATE.macros.fg };
+
+  const setTile = (id, val, tgt, unit) => {
+    el(`mpt-${id}`).textContent = val + (unit === 'cal' ? '' : 'g');
+    el(`mpt-${id}-target`).textContent = `/ ${tgt}${unit === 'cal' ? ' cal' : 'g'}`;
+    const pct = Math.min(Math.round(val / tgt * 100), 110);
+    const bar = el(`mpt-${id}-bar`);
+    bar.style.width = Math.min(pct, 100) + '%';
+    bar.classList.toggle('over', pct > 105);
+  };
+
+  setTile('cals', total.cals, target.cals, 'cal');
+  setTile('p',    total.p,    target.p,    'g');
+  setTile('c',    total.c,    target.c,    'g');
+  setTile('f',    total.f,    target.f,    'g');
+
+  el('mp-totals').style.display = 'block';
+}
+
+function openMealPlanModal(key){
+  if(!currentMealPlan || !currentMealPlan[key]) return;
+  const r = currentMealPlan[key];
+  // Reuse the existing recipe modal — temporarily set openModal to work with this recipe
+  const tempId = 'mp_' + key;
+  r._tempId = tempId;
+  // Build modal body directly
+  const sourceHtml = '';
+  const query = encodeURIComponent((r.photo || r.name) + ' food');
+  const imgSrc = `https://source.unsplash.com/600x400/?${query}`;
+  el('modal-body').innerHTML = `
+    <div class="modal-img">
+      <img src="${imgSrc}" alt="${r.name}" loading="lazy"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <span class="emoji-fallback" style="display:none">${r.emoji || '🍽️'}</span>
+    </div>
+    <div class="modal-tags" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+      <span class="recipe-tag tag-type">${r.type || key}</span>
+      ${(r.tags||[]).map(t=>`<span class="recipe-tag tag-goal">${t}</span>`).join('')}
+    </div>
+    <div class="modal-title">${r.name}</div>
+    <div class="modal-sub">${r.desc}</div>
+    <div class="modal-macro-row">
+      <div class="modal-macro"><div class="val">${r.cals}</div><div class="lbl">Calories</div></div>
+      <div class="modal-macro"><div class="val p-color">${r.p}g</div><div class="lbl">Protein</div></div>
+      <div class="modal-macro"><div class="val c-color">${r.c}g</div><div class="lbl">Carbs</div></div>
+      <div class="modal-macro"><div class="val f-color">${r.f}g</div><div class="lbl">Fat</div></div>
+    </div>
+    <div class="modal-section"><h4>Ingredients</h4>
+      <ul class="ingredient-list">${(r.ingredients||[]).map(i=>`<li>${i}</li>`).join('')}</ul>
+    </div>
+    <div class="modal-section"><h4>Method</h4>
+      <ol class="step-list">${(r.steps||[]).map(s=>`<li>${s}</li>`).join('')}</ol>
+    </div>
+  `;
+  el('modal').classList.add('open');
+}
+
+function saveMealToLibrary(key){
+  if(!currentMealPlan || !currentMealPlan[key]) return;
+  const btn = el(`mps-save-${key}`);
+  if(savedMealSlots.has(key)) return;
+  const r = { ...currentMealPlan[key], id: Date.now() + Math.random(), source: 'AI generated' };
+  RECIPES.push(r);
+  savedMealSlots.add(key);
+  btn.textContent = 'Saved /';
+  btn.classList.add('saved');
+}
+
+async function generateMealPlan(){
+  if(!STATE.cals) return;
+
+  const pref = el('mp-pref').value.trim();
+  const btn  = el('mp-gen-btn');
+  const inp  = el('mp-pref');
+
+  btn.disabled = true;
+  inp.disabled = true;
+  currentMealPlan = null;
+  mpSkeletons();
+
+  const macroCtx = `Daily targets: ${STATE.cals} cal | ${STATE.macros.pg}g protein | ${STATE.macros.cg}g carbs | ${STATE.macros.fg}g fat. Goal: ${STATE.goal}. Training: ${STATE.trainType}.`;
+  const prefCtx  = pref ? `User preferences: ${pref}.` : '';
+
+  // Distribute calories across meals: breakfast ~25%, lunch ~30%, dinner ~35%, snack ~10%
+  const dist = {
+    breakfast: Math.round(STATE.cals * 0.25),
+    lunch:     Math.round(STATE.cals * 0.30),
+    dinner:    Math.round(STATE.cals * 0.35),
+    snack:     Math.round(STATE.cals * 0.10)
+  };
+
+  try {
+    const res = await fetch('/.netlify/functions/ai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2000,
+        system: 'You are a sports nutritionist and chef. Always respond with valid JSON only — no markdown, no backticks, no extra text.',
+        messages: [{
+          role: 'user',
+          content: `${macroCtx} ${prefCtx}
+
+Generate a full day meal plan with 4 meals. Each meal must hit these calorie targets:
+- breakfast: ~${dist.breakfast} cal
+- lunch: ~${dist.lunch} cal
+- dinner: ~${dist.dinner} cal
+- snack: ~${dist.snack} cal
+
+Total must be within 5% of ${STATE.cals} cal. Protein across the day must be within 10% of ${STATE.macros.pg}g.
+
+Return a JSON object with exactly these four keys. Each meal follows this schema:
+{
+  "name": "Recipe name",
+  "desc": "One-line description, max 12 words.",
+  "type": "breakfast|lunch|dinner|snack",
+  "tags": ["High protein"],
+  "cals": 480,
+  "p": 42,
+  "c": 38,
+  "f": 14,
+  "photo": "2-4 word food photography search query",
+  "emoji": "single emoji",
+  "ingredients": ["item 1", "item 2", "item 3", "item 4"],
+  "steps": ["Step one.", "Step two.", "Step three."]
+}
+
+Tags from: High protein, Low carb, Fat loss, Build muscle, Endurance, Balanced, Meal prep, Vegetarian
+Macros must be consistent: p×4 + c×4 + f×9 ≈ cals for each meal.
+Make meals varied — different proteins, cuisines, textures across the day.
+Return: { "breakfast": {...}, "lunch": {...}, "dinner": {...}, "snack": {...} }`
+        }]
+      })
+    });
+
+    const data = await res.json();
+    const raw  = data.content?.[0]?.text || '';
+
+    let plan;
+    try {
+      const clean = raw.replace(/\`\`\`json|\`\`\`/gi, '').trim();
+      plan = JSON.parse(clean);
+    } catch(e) {
+      el('mp-slots').innerHTML = '<div class="empty"><h3>Could not parse response.</h3><p>Try again or rephrase your preferences.</p></div>';
+      btn.disabled = false; inp.disabled = false;
+      return;
+    }
+
+    const required = ['breakfast','lunch','dinner','snack'];
+    if(required.some(k => !plan[k])){
+      el('mp-slots').innerHTML = '<div class="empty"><h3>Incomplete plan returned.</h3><p>Please try again.</p></div>';
+      btn.disabled = false; inp.disabled = false;
+      return;
+    }
+
+    // Assign IDs and source
+    required.forEach(k => {
+      plan[k].id     = Date.now() + Math.random();
+      plan[k].source = 'AI generated';
+      plan[k].tags   = Array.isArray(plan[k].tags) ? plan[k].tags : [];
+      plan[k].emoji  = plan[k].emoji || '🍽️';
+    });
+
+    currentMealPlan = plan;
+    renderMealSlots(plan);
+
+  } catch(err) {
+    el('mp-slots').innerHTML = '<div class="empty"><h3>Network error.</h3><p>Check your connection and try again.</p></div>';
+  }
+
+  btn.disabled = false;
+  inp.disabled = false;
+}
+
+// Init
+renderRecipes();
+</script>
+
+<!-- MANUAL ENTRY MODAL -->
+<div class="manual-overlay" id="manual-overlay" onclick="closeManualEntry(event)">
+  <div class="manual-card" id="manual-card">
+    <div class="manual-card-title">Enter your targets.</div>
+    <div class="manual-card-sub">Already calculated your numbers elsewhere? Drop them in and go straight to your plan.</div>
+
+    <div class="field">
+      <label>Daily calories</label>
+      <input type="number" id="m-cals" placeholder="e.g. 2200" min="800" max="6000" />
+    </div>
+    <div class="field">
+      <label>Protein (g)</label>
+      <input type="number" id="m-p" placeholder="e.g. 165" min="30" max="500" />
+    </div>
+    <div class="field">
+      <label>Carbs (g)</label>
+      <input type="number" id="m-c" placeholder="e.g. 220" min="0" max="800" />
+    </div>
+    <div class="field">
+      <label>Fat (g)</label>
+      <input type="number" id="m-f" placeholder="e.g. 65" min="10" max="300" />
+    </div>
+
+    <div class="field" style="margin-top:4px;">
+      <label>Goal</label>
+      <div class="manual-goal-row">
+        <button class="manual-goal-btn" onclick="pickManualGoal('loss',this)">Fat loss</button>
+        <button class="manual-goal-btn" onclick="pickManualGoal('muscle',this)">Build muscle</button>
+        <button class="manual-goal-btn" onclick="pickManualGoal('maintain',this)">Maintain</button>
+        <button class="manual-goal-btn" onclick="pickManualGoal('endurance',this)">Endurance</button>
+      </div>
+    </div>
+
+    <div class="manual-error" id="manual-error"></div>
+
+    <div class="manual-btn-row">
+      <button class="manual-cancel" onclick="closeManualEntry()">Cancel</button>
+      <button class="manual-submit" onclick="submitManualEntry()">Go to my plan →</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
